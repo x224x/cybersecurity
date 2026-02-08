@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Writeups | x224 CyberSec</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --cyber-red: #ff0055;
+            --cyber-blue: #00d4ff;
+            --cyber-yellow: #ffeb3b;
+            --cyber-green: #00ff88;
+            --bg-dark: #0a0e27;
+            --text-primary: #e0e0e0;
+            --text-glow: rgba(0, 212, 255, 0.8);
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Matrix Rain Canvas */
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        header {
+            padding: 2rem 0;
+            margin-bottom: 3rem;
+            border-bottom: 2px solid var(--cyber-blue);
+        }
+
+        .back-link {
+            display: inline-block;
+            color: var(--cyber-green);
+            text-decoration: none;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--cyber-green);
+            border-radius: 4px;
+        }
+
+        .back-link:hover {
+            background: rgba(0, 255, 136, 0.1);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 6vw, 3.5rem);
+            font-weight: 900;
+            letter-spacing: 0.1em;
+            background: linear-gradient(135deg, var(--cyber-red), var(--cyber-blue));
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 4s ease infinite;
+            margin-bottom: 0.5rem;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .subtitle {
+            color: rgba(224, 224, 224, 0.7);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-item {
+            padding: 0.5rem 1rem;
+            background: rgba(0, 212, 255, 0.1);
+            border-left: 3px solid var(--cyber-blue);
+            border-radius: 4px;
+        }
+
+        .stat-item span {
+            color: var(--cyber-blue);
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+
+        /* Search Bar */
+        .search-container {
+            margin-bottom: 2rem;
+            max-width: 600px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: rgba(10, 14, 39, 0.8);
+            border: 2px solid var(--cyber-blue);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--cyber-green);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .search-box::placeholder {
+            color: rgba(224, 224, 224, 0.4);
+        }
+
+        /* Table Container */
+        .table-container {
+            background: rgba(10, 14, 39, 0.6);
+            border-radius: 12px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--cyber-blue);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        thead th {
+            padding: 1.5rem 1rem;
+            text-align: left;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.9rem;
+            color: var(--cyber-blue);
+            border-bottom: 2px solid var(--cyber-blue);
+        }
+
+        tbody tr {
+            border-bottom: 1px solid rgba(224, 224, 224, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        tbody tr:hover {
+            background: rgba(0, 212, 255, 0.05);
+            transform: translateX(5px);
+        }
+
+        tbody td {
+            padding: 1.5rem 1rem;
+        }
+
+        /* Machine Name */
+        .machine-name {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .machine-icon {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--cyber-green);
+            box-shadow: 0 0 10px var(--cyber-green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* OS Badge */
+        .os-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .os-badge.windows {
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid var(--cyber-blue);
+            color: var(--cyber-blue);
+        }
+
+        .os-badge.linux {
+            background: rgba(255, 235, 59, 0.2);
+            border: 1px solid var(--cyber-yellow);
+            color: var(--cyber-yellow);
+        }
+
+        .os-badge.other {
+            background: rgba(255, 0, 85, 0.2);
+            border: 1px solid var(--cyber-red);
+            color: var(--cyber-red);
+        }
+
+        /* Tools List */
+        .tools-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            max-width: 400px;
+        }
+
+        .tool-tag {
+            padding: 0.3rem 0.7rem;
+            background: rgba(255, 0, 85, 0.15);
+            border: 1px solid rgba(255, 0, 85, 0.4);
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: var(--cyber-red);
+            transition: all 0.2s ease;
+        }
+
+        .tool-tag:hover {
+            background: rgba(255, 0, 85, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Techniques List */
+        .techniques-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .technique-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: rgba(224, 224, 224, 0.9);
+        }
+
+        .technique-item::before {
+            content: '▸';
+            color: var(--cyber-green);
+            font-weight: 700;
+        }
+
+        /* Difficulty Badge */
+        .difficulty {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .difficulty.easy {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid var(--cyber-green);
+            color: var(--cyber-green);
+        }
+
+        .difficulty.medium {
+            background: rgba(255, 235, 59, 0.2);
+            border: 1px solid var(--cyber-yellow);
+            color: var(--cyber-yellow);
+        }
+
+        .difficulty.hard {
+            background: rgba(255, 0, 85, 0.2);
+            border: 1px solid var(--cyber-red);
+            color: var(--cyber-red);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .tools-list {
+                max-width: 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+
+            table {
+                min-width: 900px;
+            }
+
+            .stats {
+                flex-wrap: wrap;
+            }
+        }
+
+        /* Scan Line */
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to bottom, transparent, var(--cyber-blue), transparent);
+            opacity: 0.3;
+            z-index: 2;
+            animation: scan 8s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Matrix Rain Background -->
+    <canvas id="matrix-canvas"></canvas>
+    
+    <!-- Scan Line Effect -->
+    <div class="scanline"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <a href="index.html" class="back-link">← Volver al Portfolio</a>
+            <h1>CTF Writeups</h1>
+            <p class="subtitle">Documentación completa de máquinas resueltas y técnicas de pentesting</p>
+            <div class="stats">
+                <div class="stat-item">
+                    <span id="total-machines">12</span>
+                    Máquinas
+                </div>
+                <div class="stat-item">
+                    <span id="total-platforms">3</span>
+                    Plataformas
+                </div>
+            </div>
+        </header>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input 
+                type="text" 
+                class="search-box" 
+                id="searchInput"
+                placeholder="$ search --query 'nombre, OS, herramienta o técnica...'"
+            >
+        </div>
+
+        <!-- Machines Table -->
+        <div class="table-container">
+            <table id="machinesTable">
+                <thead>
+                    <tr>
+                        <th>Máquina</th>
+                        <th>Dificultad</th>
+                        <th>Sistema Operativo</th>
+                        <th>Herramientas Utilizadas</th>
+                        <th>Técnicas Aplicadas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Puppy - From image -->
+                    <tr onclick="window.location.href='writeups/puppy.html'">
+                        <td>
+                            <div class="machine-name">
+                                <span class="machine-icon"></span>
+                                Puppy
+                            </div>
+                        </td>
+                        <td>
+                            <span class="difficulty medium">Medium</span>
+                        </td>
+                        <td>
+                            <span class="os-badge windows">🪟 Windows</span>
+                        </td>
+                        <td>
+                            <div class="tools-list">
+                                <span class="tool-tag">Nmap</span>
+                                <span class="tool-tag">NetExec</span>
+                                <span class="tool-tag">Dig</span>
+                                <span class="tool-tag">Rpcclient</span>
+                                <span class="tool-tag">impacket-GetNPUsers</span>
+                                <span class="tool-tag">impacket-GetUserSPNs</span>
+                                <span class="tool-tag">Smbmap</span>
+                                <span class="tool-tag">BloodHound</span>
+                                <span class="tool-tag">Docker</span>
+                                <span class="tool-tag">net rpc</span>
+                                <span class="tool-tag">KeePassXC</span>
+                                <span class="tool-tag">John the Ripper</span>
+                                <span class="tool-tag">keepass4brute</span>
+                                <span class="tool-tag">LDAP</span>
+                                <span class="tool-tag">Evil-WinRM</span>
+                                <span class="tool-tag">WinPEAS</span>
+                                <span class="tool-tag">impacket-dpapi</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="techniques-list">
+                                <div class="technique-item">Enumeration DNS, SMB, Kerberos, LDAP</div>
+                                <div class="technique-item">Net rpc (add group/change password)</div>
+                                <div class="technique-item">Abuse Generic Write, GenericAll rights</div>
+                                <div class="technique-item">Abuse DPAPI</div>
+                                <div class="technique-item">Dump Domain Hashes</div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Example machines - Replace with your real data -->
+                    <tr onclick="window.location.href='writeups/example1.html'">
+                        <td>
+                            <div class="machine-name">
+                                <span class="machine-icon"></span>
+                                DevOops
+                            </div>
+                        </td>
+                        <td>
+                            <span class="difficulty medium">Medium</span>
+                        </td>
+                        <td>
+                            <span class="os-badge linux">🐧 Linux</span>
+                        </td>
+                        <td>
+                            <div class="tools-list">
+                                <span class="tool-tag">Nmap</span>
+                                <span class="tool-tag">Burp Suite</span>
+                                <span class="tool-tag">Git</span>
+                                <span class="tool-tag">Python</span>
+                                <span class="tool-tag">XXE</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="techniques-list">
+                                <div class="technique-item">XXE Injection</div>
+                                <div class="technique-item">Git Repository Exploitation</div>
+                                <div class="technique-item">Privilege Escalation via Cron</div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr onclick="window.location.href='writeups/example2.html'">
+                        <td>
+                            <div class="machine-name">
+                                <span class="machine-icon"></span>
+                                Lame
+                            </div>
+                        </td>
+                        <td>
+                            <span class="difficulty easy">Easy</span>
+                        </td>
+                        <td>
+                            <span class="os-badge linux">🐧 Linux</span>
+                        </td>
+                        <td>
+                            <div class="tools-list">
+                                <span class="tool-tag">Nmap</span>
+                                <span class="tool-tag">Metasploit</span>
+                                <span class="tool-tag">Samba</span>
+                                <span class="tool-tag">Netcat</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="techniques-list">
+                                <div class="technique-item">SMB Exploitation (CVE-2007-2447)</div>
+                                <div class="technique-item">Command Injection</div>
+                                <div class="technique-item">Root Shell</div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr onclick="window.location.href='writeups/example3.html'">
+                        <td>
+                            <div class="machine-name">
+                                <span class="machine-icon"></span>
+                                Poison
+                            </div>
+                        </td>
+                        <td>
+                            <span class="difficulty hard">Hard</span>
+                        </td>
+                        <td>
+                            <span class="os-badge other">🔧 FreeBSD</span>
+                        </td>
+                        <td>
+                            <div class="tools-list">
+                                <span class="tool-tag">Nmap</span>
+                                <span class="tool-tag">Gobuster</span>
+                                <span class="tool-tag">VNC</span>
+                                <span class="tool-tag">SSH</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="techniques-list">
+                                <div class="technique-item">LFI (Local File Inclusion)</div>
+                                <div class="technique-item">Log Poisoning</div>
+                                <div class="technique-item">VNC Tunnel via SSH</div>
+                            </div>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Matrix Rain Effect
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+-=[]{}|;:,.<>?/~`';
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+
+        const drops = [];
+        const colors = ['#ff0055', '#00d4ff', '#ffeb3b', '#00ff88'];
+        const dropColors = [];
+
+        for (let i = 0; i < columns; i++) {
+            drops[i] = Math.random() * -100;
+            dropColors[i] = colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function draw() {
+            ctx.fillStyle = 'rgba(10, 14, 39, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < drops.length; i++) {
+                const char = chars[Math.floor(Math.random() * chars.length)];
+                
+                ctx.fillStyle = dropColors[i];
+                ctx.font = fontSize + 'px JetBrains Mono';
+                ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.95) {
+                    drops[i] = 0;
+                    dropColors[i] = colors[Math.floor(Math.random() * colors.length)];
+                }
+
+                drops[i]++;
+            }
+        }
+
+        setInterval(draw, 50);
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Search Functionality
+        const searchInput = document.getElementById('searchInput');
+        const table = document.getElementById('machinesTable');
+        const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+        searchInput.addEventListener('keyup', function() {
+            const filter = searchInput.value.toLowerCase();
+
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const text = row.textContent || row.innerText;
+                
+                if (text.toLowerCase().indexOf(filter) > -1) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        });
+
+        // Update stats
+        document.getElementById('total-machines').textContent = rows.length;
+    </script>
+</body>
+</html>
