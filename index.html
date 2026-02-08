@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>x224 | CyberSec Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --cyber-red: #ff0055;
+            --cyber-blue: #00d4ff;
+            --cyber-yellow: #ffeb3b;
+            --cyber-green: #00ff88;
+            --bg-dark: #0a0e27;
+            --text-primary: #e0e0e0;
+            --text-glow: rgba(0, 212, 255, 0.8);
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Matrix Rain Canvas */
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.15;
+        }
+
+        /* Main Container */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Glitch Effect */
+        @keyframes glitch {
+            0% {
+                text-shadow: 2px 2px var(--cyber-red), -2px -2px var(--cyber-blue);
+            }
+            25% {
+                text-shadow: -2px 2px var(--cyber-yellow), 2px -2px var(--cyber-green);
+            }
+            50% {
+                text-shadow: 2px -2px var(--cyber-blue), -2px 2px var(--cyber-red);
+            }
+            75% {
+                text-shadow: -2px -2px var(--cyber-green), 2px 2px var(--cyber-yellow);
+            }
+            100% {
+                text-shadow: 2px 2px var(--cyber-red), -2px -2px var(--cyber-blue);
+            }
+        }
+
+        /* Header */
+        header {
+            padding: 3rem 0 2rem;
+            border-bottom: 2px solid var(--cyber-blue);
+            position: relative;
+            margin-bottom: 4rem;
+        }
+
+        .terminal-prompt {
+            font-size: 0.9rem;
+            color: var(--cyber-green);
+            margin-bottom: 1rem;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .terminal-prompt::before {
+            content: '$ ';
+            color: var(--cyber-red);
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 900;
+            letter-spacing: 0.1em;
+            background: linear-gradient(135deg, var(--cyber-red), var(--cyber-blue), var(--cyber-yellow), var(--cyber-green));
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 8s ease infinite, glitch 0.3s infinite;
+            margin-bottom: 1rem;
+            opacity: 0;
+            animation: fadeIn 0.8s 0.2s forwards, gradientShift 8s ease infinite, glitch 0.5s infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--cyber-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeIn 1s 0.4s forwards;
+        }
+
+        /* Bio Section */
+        .bio {
+            max-width: 800px;
+            margin-bottom: 4rem;
+            padding: 2rem;
+            background: rgba(10, 14, 39, 0.8);
+            border-left: 4px solid var(--cyber-red);
+            border-radius: 0 8px 8px 0;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            animation: slideIn 0.8s 0.6s forwards;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .bio h2 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyber-green);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .bio p {
+            line-height: 1.8;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .bio .highlight {
+            color: var(--cyber-yellow);
+            font-weight: 700;
+        }
+
+        /* Navigation Grid */
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .nav-card {
+            position: relative;
+            padding: 2.5rem 2rem;
+            background: rgba(10, 14, 39, 0.6);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            opacity: 0;
+            animation: fadeInUp 0.6s forwards;
+        }
+
+        .nav-card:nth-child(1) { animation-delay: 0.8s; border-color: var(--cyber-red); }
+        .nav-card:nth-child(2) { animation-delay: 1s; border-color: var(--cyber-blue); }
+        .nav-card:nth-child(3) { animation-delay: 1.2s; border-color: var(--cyber-yellow); }
+        .nav-card:nth-child(4) { animation-delay: 1.4s; border-color: var(--cyber-green); }
+        .nav-card:nth-child(5) { animation-delay: 1.6s; border-color: var(--cyber-red); }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .nav-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.03));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .nav-card:hover::before {
+            opacity: 1;
+        }
+
+        .nav-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.3);
+        }
+
+        .nav-card:nth-child(1):hover { box-shadow: 0 20px 60px rgba(255, 0, 85, 0.3); }
+        .nav-card:nth-child(3):hover { box-shadow: 0 20px 60px rgba(255, 235, 59, 0.3); }
+        .nav-card:nth-child(4):hover { box-shadow: 0 20px 60px rgba(0, 255, 136, 0.3); }
+
+        .nav-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .nav-card:nth-child(1) .nav-icon { color: var(--cyber-red); }
+        .nav-card:nth-child(2) .nav-icon { color: var(--cyber-blue); }
+        .nav-card:nth-child(3) .nav-icon { color: var(--cyber-yellow); }
+        .nav-card:nth-child(4) .nav-icon { color: var(--cyber-green); }
+        .nav-card:nth-child(5) .nav-icon { color: var(--cyber-red); }
+
+        .nav-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .nav-card p {
+            color: rgba(224, 224, 224, 0.8);
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .nav-card .status {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.3rem 0.8rem;
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--cyber-green);
+            border: 1px solid var(--cyber-green);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 0 2rem;
+            border-top: 2px solid var(--cyber-blue);
+            margin-top: 4rem;
+            opacity: 0;
+            animation: fadeIn 1s 1.8s forwards;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .social-links a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+
+        .social-links a:hover {
+            color: var(--cyber-blue);
+            border-color: var(--cyber-blue);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .copyright {
+            color: rgba(224, 224, 224, 0.5);
+            font-size: 0.9rem;
+        }
+
+        /* Scan Line Effect */
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to bottom, transparent, var(--cyber-blue), transparent);
+            opacity: 0.3;
+            z-index: 2;
+            animation: scan 8s linear infinite;
+            pointer-events: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .nav-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Matrix Rain Background -->
+    <canvas id="matrix-canvas"></canvas>
+    
+    <!-- Scan Line Effect -->
+    <div class="scanline"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="terminal-prompt">initializing security_portfolio.sh...</div>
+            <h1>x224</h1>
+            <div class="subtitle">CyberSec Portfolio</div>
+        </header>
+
+        <!-- Bio Section -->
+        <section class="bio">
+            <h2>// WHOAMI</h2>
+            <p>
+                Hola, soy <span class="highlight">Xinwei (x224)</span>. 
+                Especialista en ciberseguridad que explora ambos lados de la ecuación: 
+                <span class="highlight">offensive security</span> para fortalecer las defensas.
+            </p>
+            <p>
+                Este portfolio documenta mi trayectoria técnica en pentesting, análisis forense, 
+                desarrollo de herramientas y CTF challenges. Cada proyecto representa horas de investigación, 
+                experimentación y aprendizaje continuo en el mundo de la seguridad informática.
+            </p>
+            <p style="color: var(--cyber-green);">
+                <strong>$ attack_to_defend --mode=continuous_learning</strong>
+            </p>
+        </section>
+
+        <!-- Navigation Grid -->
+        <nav class="nav-grid">
+            <div class="nav-card">
+                <span class="status">Active</span>
+                <div class="nav-icon">📝</div>
+                <h3>Writeups</h3>
+                <p>Soluciones detalladas de CTF challenges, análisis de vulnerabilidades y técnicas de explotación documentadas paso a paso.</p>
+            </div>
+
+            <div class="nav-card">
+                <span class="status">Active</span>
+                <div class="nav-icon">🔍</div>
+                <h3>Análisis Forense</h3>
+                <p>Reportes de investigaciones forenses digitales, análisis de malware y reconstrucción de incidentes de seguridad.</p>
+            </div>
+
+            <div class="nav-card">
+                <span class="status">Active</span>
+                <div class="nav-icon">🎓</div>
+                <h3>Certificaciones</h3>
+                <p>Credenciales profesionales, formación continua y validación de competencias en diferentes áreas de ciberseguridad.</p>
+            </div>
+
+            <div class="nav-card">
+                <span class="status">Active</span>
+                <div class="nav-icon">🛠️</div>
+                <h3>Herramientas</h3>
+                <p>Proyectos de hardware y software personalizados: USB HID maliciosos, scripts de automatización y herramientas de pentesting.</p>
+            </div>
+
+            <div class="nav-card">
+                <span class="status">Active</span>
+                <div class="nav-icon">📚</div>
+                <h3>Recursos</h3>
+                <p>Guías, tutoriales, configuraciones de entornos de pentesting y notas técnicas sobre técnicas y metodologías.</p>
+            </div>
+        </nav>
+
+        <!-- Footer -->
+        <footer>
+            <div class="social-links">
+                <a href="https://github.com/x224" target="_blank">GitHub</a>
+                <a href="https://linkedin.com/in/x224" target="_blank">LinkedIn</a>
+                <a href="mailto:contact@x224.dev">Contact</a>
+            </div>
+            <div class="copyright">
+                &copy; 2025 x224 | Penetration Testing & Cybersecurity
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Matrix Rain Effect with Multiple Colors
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+-=[]{}|;:,.<>?/~`';
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+
+        const drops = [];
+        const colors = ['#ff0055', '#00d4ff', '#ffeb3b', '#00ff88']; // Red, Blue, Yellow, Green
+        const dropColors = [];
+
+        for (let i = 0; i < columns; i++) {
+            drops[i] = Math.random() * -100;
+            dropColors[i] = colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function draw() {
+            ctx.fillStyle = 'rgba(10, 14, 39, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < drops.length; i++) {
+                const char = chars[Math.floor(Math.random() * chars.length)];
+                
+                ctx.fillStyle = dropColors[i];
+                ctx.font = fontSize + 'px JetBrains Mono';
+                ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.95) {
+                    drops[i] = 0;
+                    dropColors[i] = colors[Math.floor(Math.random() * colors.length)];
+                }
+
+                drops[i]++;
+            }
+        }
+
+        setInterval(draw, 50);
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Add click handlers to navigation cards (placeholders for now)
+        document.querySelectorAll('.nav-card').forEach((card, index) => {
+            card.addEventListener('click', () => {
+                const sections = ['writeups', 'forensics', 'certifications', 'tools', 'resources'];
+                // For now, just log - you'll replace with actual navigation
+                console.log(`Navigating to: ${sections[index]}.html`);
+                // Future: window.location.href = `${sections[index]}.html`;
+            });
+        });
+    </script>
+</body>
+</html>
