@@ -1,531 +1,353 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-palette="cyber">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Writeups | x224 CyberSec</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Writeups | x224 CyberSec</title>
 
-        :root {
-            --cyber-red: #ff0055;
-            --cyber-blue: #00d4ff;
-            --cyber-yellow: #ffeb3b;
-            --cyber-green: #00ff88;
-            --bg-dark: #0a0e27;
-            --text-primary: #e0e0e0;
-            --text-glow: rgba(0, 212, 255, 0.8);
-        }
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 
-        body {
-            font-family: 'JetBrains Mono', monospace;
-            background: var(--bg-dark);
-            color: var(--text-primary);
-            overflow-x: hidden;
-            min-height: 100vh;
-        }
-
-        /* Matrix Rain Canvas */
-        #matrix-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            opacity: 0.1;
-        }
-
-        .container {
-            position: relative;
-            z-index: 1;
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        /* Header */
-        header {
-            padding: 2rem 0;
-            margin-bottom: 3rem;
-            border-bottom: 2px solid var(--cyber-blue);
-        }
-
-        .back-link {
-            display: inline-block;
-            color: var(--cyber-green);
-            text-decoration: none;
-            margin-bottom: 1rem;
-            transition: all 0.3s ease;
-            padding: 0.5rem 1rem;
-            border: 1px solid var(--cyber-green);
-            border-radius: 4px;
-        }
-
-        .back-link:hover {
-            background: rgba(0, 255, 136, 0.1);
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
-        }
-
-        h1 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(2rem, 6vw, 3.5rem);
-            font-weight: 900;
-            letter-spacing: 0.1em;
-            background: linear-gradient(135deg, var(--cyber-red), var(--cyber-blue));
-            background-size: 200% 200%;
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradientShift 4s ease infinite;
-            margin-bottom: 0.5rem;
-        }
-
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        .subtitle {
-            color: rgba(224, 224, 224, 0.7);
-            font-size: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .stats {
-            display: flex;
-            gap: 2rem;
-            margin-top: 1.5rem;
-        }
-
-        .stat-item {
-            padding: 0.5rem 1rem;
-            background: rgba(0, 212, 255, 0.1);
-            border-left: 3px solid var(--cyber-blue);
-            border-radius: 4px;
-        }
-
-        .stat-item span {
-            color: var(--cyber-blue);
-            font-weight: 700;
-            font-size: 1.5rem;
-            margin-right: 0.5rem;
-        }
-
-        /* Search Bar */
-        .search-container {
-            margin-bottom: 2rem;
-            max-width: 600px;
-        }
-
-        .search-box {
-            width: 100%;
-            padding: 1rem 1.5rem;
-            background: rgba(10, 14, 39, 0.8);
-            border: 2px solid var(--cyber-blue);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .search-box:focus {
-            outline: none;
-            border-color: var(--cyber-green);
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
-        }
-
-        .search-box::placeholder {
-            color: rgba(224, 224, 224, 0.4);
-        }
-
-        /* Table Container */
-        .table-container {
-            background: rgba(10, 14, 39, 0.6);
-            border-radius: 12px;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-            border: 2px solid var(--cyber-blue);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        thead {
-            background: rgba(0, 212, 255, 0.1);
-        }
-
-        thead th {
-            padding: 1.5rem 1rem;
-            text-align: left;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            font-size: 0.9rem;
-            color: var(--cyber-blue);
-            border-bottom: 2px solid var(--cyber-blue);
-        }
-
-        tbody tr {
-            border-bottom: 1px solid rgba(224, 224, 224, 0.1);
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        tbody tr:hover {
-            background: rgba(0, 212, 255, 0.05);
-            transform: translateX(5px);
-        }
-
-        tbody td {
-            padding: 1.5rem 1rem;
-        }
-
-        /* Machine Name */
-        .machine-name {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-
-        .machine-icon {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--cyber-green);
-            box-shadow: 0 0 10px var(--cyber-green);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        /* OS Badge */
-        .os-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.4rem 1rem;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        .os-badge.windows {
-            background: rgba(0, 212, 255, 0.2);
-            border: 1px solid var(--cyber-blue);
-            color: var(--cyber-blue);
-        }
-
-        .os-badge.linux {
-            background: rgba(255, 235, 59, 0.2);
-            border: 1px solid var(--cyber-yellow);
-            color: var(--cyber-yellow);
-        }
-
-        .os-badge.other {
-            background: rgba(255, 0, 85, 0.2);
-            border: 1px solid var(--cyber-red);
-            color: var(--cyber-red);
-        }
-
-        /* Tools List */
-        .tools-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            max-width: 400px;
-        }
-
-        .tool-tag {
-            padding: 0.3rem 0.7rem;
-            background: rgba(255, 0, 85, 0.15);
-            border: 1px solid rgba(255, 0, 85, 0.4);
-            border-radius: 4px;
-            font-size: 0.8rem;
-            color: var(--cyber-red);
-            transition: all 0.2s ease;
-        }
-
-        .tool-tag:hover {
-            background: rgba(255, 0, 85, 0.3);
-            transform: translateY(-2px);
-        }
-
-        /* Techniques List */
-        .techniques-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
-        }
-
-        .technique-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-            color: rgba(224, 224, 224, 0.9);
-        }
-
-        .technique-item::before {
-            content: '▸';
-            color: var(--cyber-green);
-            font-weight: 700;
-        }
-
-        /* Difficulty Badge */
-        .difficulty {
-            display: inline-block;
-            padding: 0.4rem 1rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .difficulty.easy {
-            background: rgba(0, 255, 136, 0.2);
-            border: 1px solid var(--cyber-green);
-            color: var(--cyber-green);
-        }
-
-        .difficulty.medium {
-            background: rgba(255, 235, 59, 0.2);
-            border: 1px solid var(--cyber-yellow);
-            color: var(--cyber-yellow);
-        }
-
-        .difficulty.hard {
-            background: rgba(255, 0, 85, 0.2);
-            border: 1px solid var(--cyber-red);
-            color: var(--cyber-red);
-        }
-
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .tools-list {
-                max-width: 300px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-
-            .table-container {
-                overflow-x: auto;
-            }
-
-            table {
-                min-width: 900px;
-            }
-
-            .stats {
-                flex-wrap: wrap;
-            }
-        }
-
-        /* Scan Line */
-        .scanline {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(to bottom, transparent, var(--cyber-blue), transparent);
-            opacity: 0.3;
-            z-index: 2;
-            animation: scan 8s linear infinite;
-            pointer-events: none;
-        }
-
-        @keyframes scan {
-            0% { top: 0; }
-            100% { top: 100%; }
-        }
-    </style>
+  <!-- CSS separado -->
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="writeups.css">
 </head>
 <body>
-    <!-- Matrix Rain Background -->
-    <canvas id="matrix-canvas"></canvas>
-    
-    <!-- Scan Line Effect -->
-    <div class="scanline"></div>
 
-    <div class="container">
-        <!-- Header -->
-        <header>
-            <a href="index.html" class="back-link">← Volver al Portfolio</a>
-            <h1>CTF Writeups</h1>
-            <p class="subtitle">Documentación completa de máquinas resueltas y técnicas de pentesting</p>
-            <div class="stats">
-                <div class="stat-item">
-                    <span id="total-machines">1</span>
-                    Máquinas Hack The Box
-                </div>
-            </div>
-        </header>
+  <canvas id="matrix-canvas"></canvas>
+  <div class="scanline"></div>
 
-        <!-- Search Bar -->
-        <div class="search-container">
-            <input 
-                type="text" 
-                class="search-box" 
-                id="searchInput"
-                placeholder="$ search --query 'nombre, OS, herramienta o técnica...'"
-            >
-        </div>
+  <!-- ====================================================
+       NAVBAR
+       ==================================================== -->
+  <nav class="navbar">
+    <a class="navbar__logo" href="index.html">x<em>224</em></a>
 
-        <!-- Machines Table -->
-        <div class="table-container">
-            <table id="machinesTable">
-                <thead>
-                    <tr>
-                        <th>Máquina</th>
-                        <th>Dificultad</th>
-                        <th>Sistema Operativo</th>
-                        <th>Herramientas Utilizadas</th>
-                        <th>Técnicas Aplicadas</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Puppy - From image -->
-                    <tr onclick="window.location.href='writeups/puppy.pdf'">
-                        <td>
-                            <div class="machine-name">
-                                <span class="machine-icon"></span>
-                                Puppy
-                            </div>
-                        </td>
-                        <td>
-                            <span class="difficulty medium">Medium</span>
-                        </td>
-                        <td>
-                            <span class="os-badge windows">🪟 Windows</span>
-                        </td>
-                        <td>
-                            <div class="tools-list">
-                                <span class="tool-tag">Nmap</span>
-                                <span class="tool-tag">NetExec</span>
-                                <span class="tool-tag">Dig</span>
-                                <span class="tool-tag">Rpcclient</span>
-                                <span class="tool-tag">impacket-GetNPUsers</span>
-                                <span class="tool-tag">impacket-GetUserSPNs</span>
-                                <span class="tool-tag">Smbmap</span>
-                                <span class="tool-tag">BloodHound</span>
-                                <span class="tool-tag">Docker</span>
-                                <span class="tool-tag">net rpc</span>
-                                <span class="tool-tag">KeePassXC</span>
-                                <span class="tool-tag">John the Ripper</span>
-                                <span class="tool-tag">keepass4brute</span>
-                                <span class="tool-tag">LDAP</span>
-                                <span class="tool-tag">Evil-WinRM</span>
-                                <span class="tool-tag">WinPEAS</span>
-                                <span class="tool-tag">impacket-dpapi</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="techniques-list">
-                                <div class="technique-item">Enumeration DNS, SMB, Kerberos, LDAP</div>
-                                <div class="technique-item">Net rpc (add group/change password)</div>
-                                <div class="technique-item">Abuse Generic Write, GenericAll rights</div>
-                                <div class="technique-item">Abuse DPAPI</div>
-                                <div class="technique-item">Dump Domain Hashes</div>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+    <ul class="navbar__nav">
+      <li><a href="index.html">inicio</a></li>
+      <li><a href="writeups.html" class="active">writeups</a></li>
+      <li><a href="forensics.html">forense</a></li>
+      <li><a href="certifications.html">certs</a></li>
+      <li><a href="tools.html">tools</a></li>
+    </ul>
+
+    <div class="palette-switcher" title="Cambiar paleta de colores">
+      <button class="pal-btn active" data-p="cyber"  title="Azul Cibernético"></button>
+      <button class="pal-btn"       data-p="matrix" title="Verde Matrix"></button>
+      <button class="pal-btn"       data-p="red"    title="Rojo Sangre"></button>
+      <button class="pal-btn"       data-p="purple" title="Púrpura Neon"></button>
+      <button class="pal-btn"       data-p="amber"  title="Ámbar Hacker"></button>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <!-- ====================================================
+         HEADER
+         ==================================================== -->
+    <header class="page-header">
+      <a href="index.html" class="back-link">← Volver al Portfolio</a>
+      <h1><span>CTF</span> Writeups</h1>
+      <p class="page-header__sub">Documentación completa de máquinas resueltas y técnicas de pentesting</p>
+      <div class="header-stats">
+        <div class="header-stat">
+          <strong id="stat-total">0</strong>máquinas totales
+      </div>
+    </header>
+
+    <!-- ====================================================
+         FILTROS Y BÚSQUEDA
+         ==================================================== -->
+    <div class="search-bar">
+      <span class="search-bar__icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="$ buscar por nombre, OS, herramienta o técnica...">
     </div>
 
-    <script>
-        // Matrix Rain Effect
-        const canvas = document.getElementById('matrix-canvas');
-        const ctx = canvas.getContext('2d');
+    <div class="filters" id="filterBtns">
+      <button class="filter-btn active" data-filter="all">Todos</button>
+      <button class="filter-btn" data-filter="easy">Easy</button>
+      <button class="filter-btn" data-filter="medium">Medium</button>
+      <button class="filter-btn" data-filter="hard">Hard</button>
+      <button class="filter-btn" data-filter="windows">Windows</button>
+      <button class="filter-btn" data-filter="linux">Linux</button>
+    </div>
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+    <!-- ====================================================
+         TABLA
+         ==================================================== -->
+    <div class="table-wrap">
+      <table id="machinesTable">
+        <thead>
+          <tr>
+            <th>Máquina</th>
+            <th>Dificultad</th>
+            <th>OS</th>
+            <th>Plataforma</th>
+            <th>Herramientas</th>
+            <th>Técnicas</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <!-- Generado por JS -->
+        </tbody>
+      </table>
+      <p class="no-results" id="noResults">
+        No se encontraron resultados para <span id="noResultsQuery"></span>
+      </p>
+    </div>
 
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+-=[]{}|;:,.<>?/~`';
-        const fontSize = 14;
-        const columns = canvas.width / fontSize;
+  </div><!-- /container -->
 
-        const drops = [];
-        const colors = ['#ff0055', '#00d4ff', '#ffeb3b', '#00ff88'];
-        const dropColors = [];
+  <footer>
+    <div>
+      <a href="https://linkedin.com/in/x224" target="_blank">LinkedIn</a>
+      <a href="mailto:x224@example.com">Contact</a>
+    </div>
+    <div style="margin-top:0.8rem;">&copy; 2026 x224 · Penetration Testing &amp; Forensics &amp; Cybersecurity</div>
+  </footer>
 
-        for (let i = 0; i < columns; i++) {
-            drops[i] = Math.random() * -100;
-            dropColors[i] = colors[Math.floor(Math.random() * colors.length)];
-        }
+  <!-- ====================================================
+       JAVASCRIPT
+       ==================================================== -->
+  <script>
+  /* ============================================================
+     ██████████████████████████████████████████████████████████
+     ██                                                        ██
+     ██   AÑADIR MÁQUINAS AQUÍ — solo edita este array        ██
+     ██                                                        ██
+     ██████████████████████████████████████████████████████████
 
-        function draw() {
-            ctx.fillStyle = 'rgba(10, 14, 39, 0.05)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+     Copia y pega un objeto nuevo en el array MACHINES para
+     añadir una nueva máquina. Campos:
 
-            for (let i = 0; i < drops.length; i++) {
-                const char = chars[Math.floor(Math.random() * chars.length)];
-                
-                ctx.fillStyle = dropColors[i];
-                ctx.font = fontSize + 'px JetBrains Mono';
-                ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+       name        → nombre de la máquina
+       difficulty  → "easy" | "medium" | "hard"
+       os          → "windows" | "linux" | "other"
+       platform    → "htb" | "thm" | "other"  (HTB = Hack The Box, THM = TryHackMe)
+       pdf         → ruta al PDF (ej: "writeups/puppy.pdf"). null si no hay PDF.
+       tools       → array de herramientas utilizadas
+       techniques  → array de técnicas aplicadas
 
-                if (drops[i] * fontSize > canvas.height && Math.random() > 0.95) {
-                    drops[i] = 0;
-                    dropColors[i] = colors[Math.floor(Math.random() * colors.length)];
-                }
+     ============================================================ */
+  const MACHINES = [
 
-                drops[i]++;
-            }
-        }
+    {
+      name:       'Puppy',
+      difficulty: 'medium',
+      os:         'windows',
+      platform:   'htb',
+      pdf:        'writeups/puppy.pdf',
+      tools: [
+        'Nmap', 'NetExec', 'Dig', 'Rpcclient',
+        'impacket-GetNPUsers', 'impacket-GetUserSPNs',
+        'Smbmap', 'BloodHound', 'Docker', 'net rpc',
+        'KeePassXC', 'John the Ripper', 'keepass4brute',
+        'LDAP', 'Evil-WinRM', 'WinPEAS', 'impacket-dpapi'
+      ],
+      techniques: [
+        'Enumeration DNS, SMB, Kerberos, LDAP',
+        'Net rpc (add group / change password)',
+        'Abuse Generic Write & GenericAll rights',
+        'Abuse DPAPI',
+        'Dump Domain Hashes'
+      ]
+    },
 
-        setInterval(draw, 50);
+    // ─── EJEMPLO: descomenta y edita para añadir más ─────────
+    // {
+    //   name:       'BoardLight',
+    //   difficulty: 'easy',
+    //   os:         'linux',
+    //   platform:   'htb',
+    //   pdf:        'writeups/boardlight.pdf',
+    //   tools:      ['Nmap', 'Gobuster', 'Dolibarr', 'LinPEAS'],
+    //   techniques: ['Web Enumeration', 'RCE via Dolibarr', 'SUID Abuse']
+    // },
 
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
+  ];
+  /* ============================================================
+     FIN DE LA CONFIGURACIÓN — no tocar lo de abajo
+     ============================================================ */
 
-        // Search Functionality
-        const searchInput = document.getElementById('searchInput');
-        const table = document.getElementById('machinesTable');
-        const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
 
-        searchInput.addEventListener('keyup', function() {
-            const filter = searchInput.value.toLowerCase();
+  /* -------------------------------------------------------
+     PALETTE SWITCHER
+     ------------------------------------------------------- */
+  const html = document.documentElement;
 
-            for (let i = 0; i < rows.length; i++) {
-                const row = rows[i];
-                const text = row.textContent || row.innerText;
-                
-                if (text.toLowerCase().indexOf(filter) > -1) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            }
-        });
+  function applyPalette(p) {
+    html.setAttribute('data-palette', p);
+    document.querySelectorAll('.pal-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.p === p);
+    });
+    localStorage.setItem('x224-palette', p);
+  }
 
-        // Update stats
-        document.getElementById('total-machines').textContent = rows.length;
-    </script>
+  const savedPal = localStorage.getItem('x224-palette') || 'cyber';
+  applyPalette(savedPal);
+
+  document.querySelectorAll('.pal-btn').forEach(btn => {
+    btn.addEventListener('click', () => applyPalette(btn.dataset.p));
+  });
+
+
+  /* -------------------------------------------------------
+     MATRIX RAIN
+     ------------------------------------------------------- */
+  (function(){
+    const canvas = document.getElementById('matrix-canvas');
+    const ctx    = canvas.getContext('2d');
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    resize(); window.addEventListener('resize', resize);
+
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*<>?/~`';
+    const fSize = 14;
+    let drops = [], dColors = [];
+
+    function init() {
+      const cols = Math.floor(canvas.width / fSize);
+      drops   = Array.from({length: cols}, () => Math.random() * -100);
+      dColors = drops.map(() => getComputedStyle(html).getPropertyValue('--matrix-color').trim());
+    }
+    init(); window.addEventListener('resize', init);
+
+    setInterval(() => {
+      const c = getComputedStyle(html).getPropertyValue('--matrix-color').trim();
+      ctx.fillStyle = 'rgba(0,0,0,0.045)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < drops.length; i++) {
+        ctx.fillStyle = dColors[i] || c;
+        ctx.font = fSize + 'px JetBrains Mono';
+        ctx.fillText(chars[Math.floor(Math.random() * chars.length)], i * fSize, drops[i] * fSize);
+        if (drops[i] * fSize > canvas.height && Math.random() > 0.96) { drops[i] = 0; dColors[i] = c; }
+        drops[i]++;
+      }
+    }, 45);
+  })();
+
+
+  /* -------------------------------------------------------
+     RENDERIZAR TABLA
+     ------------------------------------------------------- */
+  const OS_LABEL = { windows: '🪟 Windows', linux: '🐧 Linux', other: '❓ Other' };
+  const PLAT_LABEL = { htb: 'Hack The Box', thm: 'TryHackMe', other: 'Other' };
+
+  function renderRow(m) {
+    const diffClass = m.difficulty; // easy | medium | hard
+    const tr = document.createElement('tr');
+    tr.setAttribute('data-diff', m.difficulty);
+    tr.setAttribute('data-os',   m.os);
+
+    if (m.pdf) {
+      tr.style.cursor = 'pointer';
+      tr.addEventListener('click', () => window.open(m.pdf, '_blank'));
+    }
+
+    // ── Nombre ──
+    const tdName = document.createElement('td');
+    tdName.innerHTML = `
+      <div class="machine-name">
+        <span class="machine-dot"></span>
+        ${escapeHtml(m.name)}
+        ${m.pdf ? '<span style="color:var(--text-muted);font-size:0.75rem;margin-left:4px" title="PDF disponible">📄</span>' : ''}
+      </div>`;
+
+    // ── Dificultad ──
+    const tdDiff = document.createElement('td');
+    tdDiff.innerHTML = `<span class="badge badge-${diffClass}">${m.difficulty.charAt(0).toUpperCase() + m.difficulty.slice(1)}</span>`;
+
+    // ── OS ──
+    const tdOs = document.createElement('td');
+    tdOs.innerHTML = `<span class="os-badge">${OS_LABEL[m.os] || m.os}</span>`;
+
+    // ── Plataforma ──
+    const tdPlat = document.createElement('td');
+    tdPlat.innerHTML = `<span style="color:var(--text-2);font-size:0.82rem">${PLAT_LABEL[m.platform] || m.platform}</span>`;
+
+    // ── Herramientas ──
+    const tdTools = document.createElement('td');
+    tdTools.innerHTML = `<div class="tools-list">${m.tools.map(t => `<span class="tool-tag">${escapeHtml(t)}</span>`).join('')}</div>`;
+
+    // ── Técnicas ──
+    const tdTech = document.createElement('td');
+    tdTech.innerHTML = `<div class="techniques-list">${m.techniques.map(t => `<div class="technique-item">${escapeHtml(t)}</div>`).join('')}</div>`;
+
+    tr.append(tdName, tdDiff, tdOs, tdPlat, tdTools, tdTech);
+    return tr;
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function populate(list) {
+    const tbody = document.getElementById('table-body');
+    tbody.innerHTML = '';
+    list.forEach(m => tbody.appendChild(renderRow(m)));
+  }
+
+  populate(MACHINES);
+
+  // ── Stats ──
+  document.getElementById('stat-total').textContent = MACHINES.length;
+  document.getElementById('stat-htb').textContent   = MACHINES.filter(m => m.platform === 'htb').length;
+  document.getElementById('stat-thm').textContent   = MACHINES.filter(m => m.platform === 'thm').length;
+
+
+  /* -------------------------------------------------------
+     BÚSQUEDA + FILTROS
+     ------------------------------------------------------- */
+  let activeFilter = 'all';
+  let searchTerm   = '';
+
+  function filtered() {
+    return MACHINES.filter(m => {
+      const matchFilter =
+        activeFilter === 'all'     ? true :
+        activeFilter === 'easy'    ? m.difficulty === 'easy' :
+        activeFilter === 'medium'  ? m.difficulty === 'medium' :
+        activeFilter === 'hard'    ? m.difficulty === 'hard' :
+        activeFilter === 'windows' ? m.os === 'windows' :
+        activeFilter === 'linux'   ? m.os === 'linux' : true;
+
+      const haystack = [
+        m.name, m.difficulty, m.os, m.platform,
+        ...m.tools, ...m.techniques
+      ].join(' ').toLowerCase();
+
+      const matchSearch = !searchTerm || haystack.includes(searchTerm.toLowerCase());
+      return matchFilter && matchSearch;
+    });
+  }
+
+  function update() {
+    const list = filtered();
+    populate(list);
+
+    const noRes = document.getElementById('noResults');
+    const wrap  = document.querySelector('.table-wrap');
+    if (list.length === 0) {
+      noRes.style.display = 'block';
+      document.getElementById('noResultsQuery').textContent = `"${searchTerm || activeFilter}"`;
+    } else {
+      noRes.style.display = 'none';
+    }
+  }
+
+  document.getElementById('searchInput').addEventListener('input', e => {
+    searchTerm = e.target.value;
+    update();
+  });
+
+  document.getElementById('filterBtns').addEventListener('click', e => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    activeFilter = btn.dataset.filter;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b === btn));
+    update();
+  });
+
+  </script>
 </body>
 </html>

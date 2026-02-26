@@ -1,0 +1,263 @@
+/* ================================================================
+   WRITEUPS.CSS — Estilos específicos de la página de writeups
+   ================================================================ */
+
+/* ================================================================
+   HEADER
+   ================================================================ */
+.page-header {
+  padding-top: 56px;
+  padding-bottom: 3rem;
+  margin-bottom: 3rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--green);
+  text-decoration: none;
+  font-size: 0.82rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid rgba(34, 211, 165, 0.35);
+  border-radius: 5px;
+  margin-bottom: 2rem;
+  margin-top: 2rem;
+  transition: all 0.2s;
+}
+.back-link:hover {
+  background: rgba(34, 211, 165, 0.08);
+  box-shadow: 0 0 16px rgba(34,211,165,0.2);
+  color: var(--green);
+}
+
+.page-header h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+.page-header h1 span { color: var(--accent); }
+
+.page-header__sub {
+  color: var(--text-2);
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+.header-stats {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.header-stat {
+  padding: 0.4rem 1rem;
+  background: var(--glow);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+  font-size: 0.82rem;
+}
+.header-stat strong {
+  color: var(--accent);
+  font-size: 1.2rem;
+  margin-right: 0.35rem;
+}
+
+/* ================================================================
+   SEARCH
+   ================================================================ */
+.search-bar {
+  position: relative;
+  max-width: 560px;
+  margin-bottom: 2.5rem;
+}
+.search-bar__icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+#searchInput {
+  width: 100%;
+  padding: 0.85rem 1rem 0.85rem 2.8rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+#searchInput:focus {
+  border-color: var(--border-bright);
+  box-shadow: 0 0 20px var(--glow);
+}
+#searchInput::placeholder { color: var(--text-muted); }
+
+/* ================================================================
+   FILTROS
+   ================================================================ */
+.filters {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 2.5rem;
+}
+
+.filter-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.9rem;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.filter-btn:hover,
+.filter-btn.active {
+  background: var(--glow);
+  border-color: var(--border-bright);
+  color: var(--accent);
+}
+
+/* ================================================================
+   TABLA
+   ================================================================ */
+.table-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px var(--glow);
+  margin-bottom: 4rem;
+}
+
+#machinesTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#machinesTable thead {
+  background: var(--bg-glass);
+}
+
+#machinesTable thead th {
+  padding: 1.2rem 1rem;
+  text-align: left;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+#machinesTable tbody tr {
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+#machinesTable tbody tr:last-child { border-bottom: none; }
+#machinesTable tbody tr:hover {
+  background: var(--glow);
+  transform: translateX(4px);
+}
+
+#machinesTable tbody td {
+  padding: 1.2rem 1rem;
+  vertical-align: top;
+}
+
+/* Nombre máquina */
+.machine-name {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text);
+}
+.machine-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  color: var(--green);
+  flex-shrink: 0;
+  animation: pulse 2s infinite;
+}
+
+/* Tags de herramientas */
+.tools-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  max-width: 380px;
+}
+
+.tool-tag {
+  padding: 0.2rem 0.6rem;
+  background: rgba(56,189,248,0.08);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-size: 0.72rem;
+  color: var(--accent);
+  transition: background 0.15s;
+}
+.tool-tag:hover {
+  background: var(--glow);
+  border-color: var(--border-bright);
+}
+
+/* Técnicas */
+.techniques-list { display: flex; flex-direction: column; gap: 0.35rem; }
+.technique-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--text-2);
+  line-height: 1.4;
+}
+.technique-item::before {
+  content: '▸';
+  color: var(--accent);
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 0.05em;
+}
+
+/* Sin resultados */
+.no-results {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  display: none;
+}
+.no-results span { color: var(--accent); }
+
+/* ================================================================
+   RESPONSIVO WRITEUPS
+   ================================================================ */
+@media (max-width: 1100px) {
+  .tools-list { max-width: 280px; }
+}
+@media (max-width: 768px) {
+  .table-wrap { overflow-x: auto; }
+  #machinesTable { min-width: 860px; }
+  .header-stats { flex-wrap: wrap; }
+}

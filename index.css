@@ -1,0 +1,360 @@
+/* ================================================================
+   INDEX.CSS — Estilos específicos de la página principal
+   ================================================================ */
+
+/* ================================================================
+   HERO
+   ================================================================ */
+.hero {
+  padding-top: 56px;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Grid de fondo */
+.hero__grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 70px 70px;
+  mask-image: radial-gradient(ellipse 90% 80% at 50% 50%, black 20%, transparent 80%);
+  opacity: 0.5;
+}
+
+.hero__content {
+  position: relative;
+  z-index: 1;
+  padding: 4rem 0;
+  animation: fadeInUp 0.8s ease both;
+}
+
+.hero__prompt {
+  font-size: 0.8rem;
+  color: var(--green);
+  margin-bottom: 1.2rem;
+  opacity: 0;
+  animation: fadeIn 0.5s 0.1s forwards;
+}
+.hero__prompt::before { content: '$ '; color: var(--accent); }
+
+.hero__title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(3rem, 9vw, 7rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+  opacity: 0;
+  animation: fadeIn 0.6s 0.2s forwards, glitch 6s 2s infinite;
+}
+
+.hero__title span { color: var(--accent); }
+
+/* Nuevo estilo para el WHOAMI */
+.hero__subtitle {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(1.2rem, 3vw, 1.8rem); /* Mucho más pequeño y responsivo */
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--text-2); /* Un tono un poco más suave que el blanco puro */
+  margin-bottom: 1rem;
+  opacity: 0;
+  animation: fadeIn 0.6s 0.3s forwards; /* Aparece justo después del título principal */
+}
+
+.hero__subtitle span { 
+  color: var(--accent); 
+}
+
+.hero__role {
+  font-size: clamp(0.85rem, 2vw, 1.1rem);
+  color: var(--accent);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-bottom: 1.8rem;
+  opacity: 0;
+  animation: fadeIn 0.6s 0.4s forwards;
+}
+
+.hero__bio {
+  max-width: 560px;
+  color: var(--text-2);
+  line-height: 1.9;
+  font-size: 0.9rem;
+  margin-bottom: 2.5rem;
+  opacity: 0;
+  animation: fadeIn 0.7s 0.6s forwards;
+}
+
+.hero__bio .hl { color: var(--accent); font-weight: 700; }
+
+.cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--accent);
+  vertical-align: text-bottom;
+  margin-left: 2px;
+  animation: blink 1s step-end infinite;
+}
+
+.hero__btns {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: fadeIn 0.7s 0.8s forwards;
+}
+
+/* ================================================================
+   STATS BAR
+   ================================================================ */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 5rem 0 6rem;
+}
+
+.stat-item {
+  background: var(--bg-card);
+  padding: 1.6rem 1.4rem;
+  text-align: center;
+  transition: background 0.2s;
+}
+.stat-item:hover { background: var(--bg-glass); }
+
+.stat-item__num {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 0.4rem;
+}
+
+.stat-item__lbl {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ================================================================
+   SECCIÓN NAVEGACIÓN — TARJETAS
+   ================================================================ */
+.section-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--border), transparent);
+}
+
+.nav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 6rem;
+}
+
+.nav-card {
+  position: relative;
+  display: block;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 2rem 1.8rem;
+  overflow: hidden;
+  transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+  opacity: 0;
+  animation: fadeInUp 0.6s both;
+}
+
+.nav-card:nth-child(1) { animation-delay: 0.1s; }
+.nav-card:nth-child(2) { animation-delay: 0.2s; }
+.nav-card:nth-child(3) { animation-delay: 0.3s; }
+.nav-card:nth-child(4) { animation-delay: 0.4s; }
+.nav-card:nth-child(5) { animation-delay: 0.5s; }
+
+.nav-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s;
+}
+
+.nav-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--border-bright);
+  box-shadow: 0 16px 40px var(--glow);
+}
+.nav-card:hover::before { transform: scaleX(1); }
+
+.nav-card__badge {
+  position: absolute;
+  top: 1rem; right: 1rem;
+}
+
+.nav-card__icon {
+  font-size: 2.2rem;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 0 8px var(--glow));
+}
+
+.nav-card__title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.7rem;
+  color: var(--text);
+}
+
+.nav-card__desc {
+  font-size: 0.82rem;
+  color: var(--text-2);
+  line-height: 1.7;
+}
+
+/* ================================================================
+   TERMINAL INTERACTIVA
+   ================================================================ */
+.terminal-section {
+  margin-bottom: 6rem;
+}
+
+.terminal-window {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px var(--glow);
+}
+
+.terminal-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.2rem;
+  background: var(--bg-glass);
+  border-bottom: 1px solid var(--border);
+}
+
+.terminal-titlebar__dots {
+  display: flex;
+  gap: 6px;
+}
+
+.terminal-titlebar__dots span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+.terminal-titlebar__dots span:nth-child(1) { background: #ff5f57; }
+.terminal-titlebar__dots span:nth-child(2) { background: #febc2e; }
+.terminal-titlebar__dots span:nth-child(3) { background: #28c840; }
+
+.terminal-titlebar__label {
+  flex: 1;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+}
+
+.terminal-body {
+  padding: 1.5rem;
+  min-height: 320px;
+  max-height: 420px;
+  overflow-y: auto;
+  font-size: 0.88rem;
+  line-height: 1.8;
+  background: var(--bg-deep);
+}
+
+.terminal-line {
+  margin-bottom: 0.1rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.t-prompt { color: var(--accent); user-select: none; }
+.t-prompt .t-user  { color: var(--green); }
+.t-prompt .t-host  { color: var(--accent); }
+.t-prompt .t-path  { color: var(--accent-2); }
+.t-prompt .t-sym   { color: var(--text-muted); }
+
+.t-output { color: var(--text-2); }
+.t-error  { color: var(--red); }
+.t-success{ color: var(--green); }
+.t-info   { color: var(--accent); }
+.t-dir    { color: var(--accent); font-weight: 700; }
+.t-file   { color: var(--text-2); }
+.t-link   { color: var(--green); text-decoration: underline; cursor: pointer; }
+
+.terminal-input-row {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1.5rem;
+  background: var(--bg-deep);
+  border-top: 1px solid var(--border);
+  gap: 0.5rem;
+}
+
+.terminal-input-row .t-prompt { white-space: nowrap; font-size: 0.88rem; }
+
+#term-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.88rem;
+  caret-color: var(--accent);
+}
+
+.terminal-help-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding: 0.5rem 1.5rem;
+  background: var(--bg-deep);
+  border-top: 1px solid var(--border);
+}
+
+/* ================================================================
+   RESPONSIVO INDEX
+   ================================================================ */
+@media (max-width: 768px) {
+  .nav-grid { grid-template-columns: 1fr; }
+  .stats-bar { grid-template-columns: repeat(2, 1fr); }
+}
