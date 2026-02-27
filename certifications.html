@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es" data-palette="purple">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Certificaciones | x224 CyberSec</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="certifications.css">
+</head>
+<body>
+
+  <canvas id="matrix-canvas"></canvas>
+  <div class="scanline"></div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a class="navbar__logo" href="index.html">x<em>224</em></a>
+
+    <ul class="navbar__nav">
+      <li><a href="index.html#about">whoami</a></li>
+      <li><a href="index.html#sections">secciones</a></li>
+      <li><a href="index.html#terminal">terminal</a></li>
+      <li><a href="writeups.html">writeups</a></li>
+      <li><a href="forensics.html">forense</a></li>
+      <li><a href="certifications.html" class="active">certificaciones</a></li>
+    </ul>
+
+    <div class="palette-switcher" title="Cambiar paleta de colores">
+      <button class="pal-btn active" data-p="purple" title="Púrpura Neon"></button>
+      <button class="pal-btn"       data-p="matrix" title="Verde Matrix"></button>
+      <button class="pal-btn"       data-p="red"    title="Rojo Sangre"></button>
+      <button class="pal-btn"       data-p="amber"  title="Ámbar Hacker"></button>
+      <button class="pal-btn"       data-p="cyber"  title="Azul Cibernético"></button>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <!-- HEADER -->
+    <header class="page-header">
+      <a href="index.html" class="back-link">← Volver al Portfolio</a>
+      <h1><span>Certifi</span>caciones</h1>
+      <p class="page-header__sub">Credenciales profesionales y validación de competencias en ciberseguridad</p>
+      <div class="header-stats">
+        <div class="header-stat"><strong>6</strong>certificaciones</div>
+        <div class="header-stat"><strong>5</strong>emisores distintos</div>
+        <div class="header-stat"><strong>3</strong>áreas cubiertas</div>
+      </div>
+    </header>
+
+    <!-- GRID -->
+    <div class="section-title">// Certificados obtenidos</div>
+    <div class="certs-grid" id="certs-grid"></div>
+
+    <!-- TIMELINE -->
+    <section class="timeline-section">
+      <div class="section-title">// Línea de tiempo</div>
+      <div class="timeline" id="timeline"></div>
+    </section>
+
+  </div>
+
+  <!-- MODAL -->
+  <div id="modal" style="
+    display:none; position:fixed; inset:0; z-index:1000;
+    background:rgba(3,7,18,0.93); backdrop-filter:blur(10px);
+    align-items:center; justify-content:center; padding:2rem;
+  " onclick="closeModal()">
+    <div style="position:relative; max-width:860px; width:100%;" onclick="event.stopPropagation()">
+      <button onclick="closeModal()" style="
+        position:absolute; top:-2.5rem; right:0;
+        background:none; border:none; color:var(--text-muted);
+        font-family:'JetBrains Mono',monospace; font-size:0.85rem;
+        cursor:pointer; letter-spacing:0.1em;
+      ">[ ESC ] cerrar ✕</button>
+      <img id="modal-img" src="" alt=""
+        style="width:100%; border-radius:10px; border:1px solid var(--border-bright);
+               box-shadow:0 30px 80px var(--glow-strong);">
+      <p id="modal-name" style="
+        text-align:center; margin-top:1rem;
+        font-family:'Orbitron',sans-serif; font-size:0.85rem;
+        color:var(--accent); letter-spacing:0.1em;
+      "></p>
+    </div>
+  </div>
+
+  <footer>
+    <div>
+      <a href="https://linkedin.com/in/x224" target="_blank">LinkedIn</a>
+      <a href="mailto:xw.xinweiwu@gmail.com">Contact</a>
+    </div>
+    <div style="margin-top:0.8rem;">&copy; 2026 x224 · Penetration Testing &amp; Forensics &amp; Cybersecurity</div>
+  </footer>
+
+  <script>
+  /* ============================================================
+     CERTIFICADOS — edita este array para añadir / modificar
+     Orden: más reciente primero
+     ============================================================
+     Campos:
+       name     → nombre completo
+       short    → nombre corto (para timeline)
+       issuer   → organismo emisor
+       img      → ruta imagen (dentro de la carpeta certs/)
+       date     → fecha legible (ej: "26 feb 2026")
+       category → "pentest" | "security" | "cloud" | "microsoft"
+       verify   → URL verificación o null
+     ============================================================ */
+  const CERTS = [
+    {
+      name:     'eCPPT v3 — Certified Professional Penetration Tester',
+      short:    'eCPPTv3',
+      issuer:   'eLearnSecurity · INE',
+      img:      'certs/eCPPTv3.png',
+      date:     '26 feb 2026',
+      category: 'pentest',
+      verify:   null,
+    },
+    {
+      name:     'eJPT v2 — eLearnSecurity Junior Penetration Tester',
+      short:    'eJPTv2',
+      issuer:   'eLearnSecurity · INE',
+      img:      'certs/eJPTv2.png',
+      date:     '25 dic 2025',
+      category: 'pentest',
+      verify:   null,
+    },
+    {
+      name:     'CEH v13 — Certified Ethical Hacker',
+      short:    'CEHv13',
+      issuer:   'EC-Council',
+      img:      'certs/CEHv13.png',
+      date:     '18 nov 2025',
+      category: 'security',
+      verify:   null,
+    },
+    {
+      name:     'AWS Certified Cloud Practitioner',
+      short:    'AWS CCP',
+      issuer:   'Amazon Web Services',
+      img:      'certs/AWSCloudPractitioner.png',
+      date:     '30 jun 2025',
+      category: 'cloud',
+      verify:   null,
+    },
+    {
+      name:     'SC-900 — Microsoft Security Fundamentals',
+      short:    'SC-900',
+      issuer:   'Microsoft',
+      img:      'certs/SC-900.png',
+      date:     '6 mar 2025',
+      category: 'cloud',
+      verify:   null,
+    },
+    {
+      name:     'CCST Cybersecurity',
+      short:    'CCST',
+      issuer:   'Cisco',
+      img:      'certs/CCST.png',
+      date:     '14 ene 2025',
+      category: 'security',
+      verify:   null,
+    },
+  ];
+  /* ============================================================ */
+
+  const CAT_LABEL = {
+    pentest:   { label: 'Pentesting', cls: 'cat-pentest'   },
+    security:  { label: 'Security',   cls: 'cat-security'  },
+    cloud:     { label: 'Cloud',      cls: 'cat-cloud'     },
+    microsoft: { label: 'Cloud',      cls: 'cat-cloud'     },
+  };
+
+  /* ── PALETTE ── */
+  const html = document.documentElement;
+  function applyPalette(p) {
+    html.setAttribute('data-palette', p);
+    document.querySelectorAll('.pal-btn').forEach(b => b.classList.toggle('active', b.dataset.p === p));
+    localStorage.setItem('x224-palette', p);
+  }
+  // Restaurar paleta guardada, o usar púrpura por defecto en esta página
+  const saved = localStorage.getItem('x224-palette');
+  applyPalette(saved || 'purple');
+  document.querySelectorAll('.pal-btn').forEach(b => b.addEventListener('click', () => applyPalette(b.dataset.p)));
+
+  /* ── MATRIX RAIN ── */
+  (function(){
+    const canvas = document.getElementById('matrix-canvas');
+    const ctx    = canvas.getContext('2d');
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    resize(); window.addEventListener('resize', resize);
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*<>?/~`';
+    const fSize = 14;
+    let drops = [], dColors = [];
+    function init() {
+      const cols = Math.floor(canvas.width / fSize);
+      drops   = Array.from({length: cols}, () => Math.random() * -100);
+      dColors = drops.map(() => getComputedStyle(html).getPropertyValue('--matrix-color').trim());
+    }
+    init(); window.addEventListener('resize', init);
+    setInterval(() => {
+      const c = getComputedStyle(html).getPropertyValue('--matrix-color').trim();
+      ctx.fillStyle = 'rgba(0,0,0,0.045)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < drops.length; i++) {
+        ctx.fillStyle = dColors[i] || c;
+        ctx.font      = fSize + 'px JetBrains Mono';
+        ctx.fillText(chars[Math.floor(Math.random() * chars.length)], i * fSize, drops[i] * fSize);
+        if (drops[i] * fSize > canvas.height && Math.random() > 0.96) { drops[i] = 0; dColors[i] = c; }
+        drops[i]++;
+      }
+    }, 45);
+  })();
+
+  /* ── RENDER CARDS ── */
+  function renderCards() {
+    const grid = document.getElementById('certs-grid');
+    CERTS.forEach((c, i) => {
+      const cat  = CAT_LABEL[c.category] || { label: c.category, cls: 'cat-security' };
+      const card = document.createElement('div');
+      card.className = 'cert-card';
+      card.innerHTML = `
+        <div class="cert-card__img-wrap">
+          <img class="cert-card__img" src="${c.img}" alt="${c.name}"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="cert-card__img-placeholder" style="display:none;align-items:center;justify-content:center;width:100%;height:100%">🎓</div>
+        </div>
+        <div class="cert-card__body">
+          <div class="cert-card__vendor"><span class="vendor-dot"></span>${c.issuer}</div>
+          <div class="cert-card__name">${c.name}</div>
+          <div class="cert-card__meta">
+            <span class="cat-tag ${cat.cls}">${cat.label}</span>
+            <span class="cat-tag" style="border-color:var(--border);color:var(--text-muted)">📅 ${c.date}</span>
+          </div>
+          ${c.verify ? `<a class="cert-card__link" href="${c.verify}" target="_blank">🔗 Verificar</a>` : ''}
+        </div>
+        <div class="cert-card__num">0${i + 1}</div>`;
+
+      card.querySelector('.cert-card__img-wrap')
+          .addEventListener('click', () => openModal(c.img, c.name));
+      grid.appendChild(card);
+    });
+  }
+
+  /* ── RENDER TIMELINE ── */
+  function renderTimeline() {
+    const tl = document.getElementById('timeline');
+    CERTS.forEach(c => {
+      const cat  = CAT_LABEL[c.category] || { label: c.category, cls: 'cat-security' };
+      const item = document.createElement('div');
+      item.className = 'tl-item';
+      item.innerHTML = `
+        <div class="tl-date">${c.date}</div>
+        <div class="tl-name">${c.short}</div>
+        <div class="tl-issuer">
+          ${c.issuer}
+          <span class="cat-tag ${cat.cls}" style="font-size:0.65rem;padding:0.1rem 0.5rem">${cat.label}</span>
+        </div>`;
+      tl.appendChild(item);
+    });
+  }
+
+  /* ── MODAL ── */
+  function openModal(src, name) {
+    document.getElementById('modal-img').src = src;
+    document.getElementById('modal-name').textContent = name;
+    document.getElementById('modal').style.display = 'flex';
+    document.addEventListener('keydown', onEsc);
+  }
+  function closeModal() {
+    document.getElementById('modal').style.display = 'none';
+    document.removeEventListener('keydown', onEsc);
+  }
+  function onEsc(e) { if (e.key === 'Escape') closeModal(); }
+
+  renderCards();
+  renderTimeline();
+  </script>
+
+</body>
+</html>

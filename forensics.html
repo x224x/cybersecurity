@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es" data-palette="cyber">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Análisis Forense | x224 CyberSec</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="forensics.css">
+</head>
+<body>
+
+  <canvas id="matrix-canvas"></canvas>
+  <div class="scanline"></div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a class="navbar__logo" href="index.html">x<em>224</em></a>
+    <ul class="navbar__nav">
+      <li><a href="index.html#about">whoami</a></li>
+      <li><a href="index.html#sections">secciones</a></li>
+      <li><a href="index.html#terminal">terminal</a></li>
+      <li><a href="writeups.html">writeups</a></li>
+      <li><a href="forensics.html" class="active">forense</a></li>
+      <li><a href="certifications.html">certificaciones</a></li>
+    </ul>
+    <div class="palette-switcher" title="Cambiar paleta de colores">
+      <button class="pal-btn"       data-p="purple" title="Púrpura Neon"></button>
+      <button class="pal-btn"       data-p="matrix" title="Verde Matrix"></button>
+      <button class="pal-btn"       data-p="red"    title="Rojo Sangre"></button>
+      <button class="pal-btn"       data-p="amber"  title="Ámbar Hacker"></button>
+      <button class="pal-btn active" data-p="cyber"  title="Azul Cibernético"></button>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <!-- HEADER -->
+    <header class="page-header">
+      <a href="index.html" class="back-link">← Volver al Portfolio</a>
+      <h1>Análisis <span>Forense</span></h1>
+      <p class="page-header__sub">Investigaciones forenses digitales, análisis de malware y reconstrucción de incidentes</p>
+      <div class="header-stats">
+        <div class="header-stat"><strong>4</strong>casos analizados</div>
+        <div class="header-stat"><strong>4</strong>vectores distintos</div>
+        <div class="header-stat"><strong>4</strong>plataformas</div>
+      </div>
+    </header>
+
+    <!-- GRID -->
+    <div class="section-title">// Casos documentados</div>
+    <div class="forensics-grid" id="forensics-grid"></div>
+
+    <!-- STATS -->
+    <div class="stats-strip">
+      <div class="strip-item">
+        <div class="strip-item__num">4</div>
+        <div class="strip-item__lbl">Informes PDF</div>
+      </div>
+      <div class="strip-item">
+        <div class="strip-item__num">IoT</div>
+        <div class="strip-item__lbl">Firmware</div>
+      </div>
+      <div class="strip-item">
+        <div class="strip-item__num">RAM</div>
+        <div class="strip-item__lbl">Volcado Memoria</div>
+      </div>
+      <div class="strip-item">
+        <div class="strip-item__num">iOS</div>
+        <div class="strip-item__lbl">Móvil</div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <div>
+      <a href="https://linkedin.com/in/x224" target="_blank">LinkedIn</a>
+      <a href="mailto:xw.xinweiwu@gmail.com">Contact</a>
+    </div>
+    <div style="margin-top:0.8rem;">&copy; 2026 x224 · Penetration Testing &amp; Forensics &amp; Cybersecurity</div>
+  </footer>
+
+  <script>
+  /* ============================================================
+     CASOS FORENSES — edita este array para añadir / modificar
+
+     Campos:
+       title    → título del informe
+       icon     → emoji representativo
+       pdf      → ruta al PDF dentro de /forensic/
+       tags     → array de categorías (ver clases: tag-iot, tag-forense,
+                  tag-memoria, tag-movil, tag-windows, tag-linux,
+                  tag-ios, tag-malware, tag-red)
+       summary  → descripción breve (1-2 frases)
+       findings → array de hallazgos clave (bullets)
+       tools    → array de herramientas utilizadas
+     ============================================================ */
+  const CASES = [
+    {
+      title:   'Volcado de Memoria — Análisis de Ataque Multivectorial',
+      icon:    '🧠',
+      pdf:     'forensic/Volcado Memoria de Windows.pdf',
+      tags:    [
+        { label: 'Memoria RAM', cls: 'tag-memoria' },
+        { label: 'Windows',     cls: 'tag-windows' },
+        { label: 'Malware',     cls: 'tag-malware' },
+        { label: 'Red',         cls: 'tag-red'     },
+      ],
+      summary: 'Análisis de un volcado de memoria RAM de un servidor Windows con DVWA comprometido. Se reconstruyó un ataque multivectorial completo: desde reconocimiento hasta persistencia y limpieza de huellas.',
+      findings: [
+        'LFI explotado para leer hosts y configuración de phpMyAdmin',
+        'SQLi con SQLmap → webshell tmpukudk.php vía INTO OUTFILE',
+        'Inyección de comandos mediante operador && en /vulnerabilities/exec/',
+        'Webshells subidos: c99.php, phpshell.php, phpshell2.php (reverse shell)',
+        'Usuarios creados: hacker, user1 → grupo "Remote Desktop Users"',
+        'RDP habilitado via netsh para acceso persistente',
+        'IP atacante identificada: 192.168.56.102',
+      ],
+      tools: ['Volatility', 'SQLmap', 'DVWA', 'Wireshark', 'strings', 'grep'],
+    },
+    {
+      title:   'Análisis de Firmware IoT — Cámara y Bombilla',
+      icon:    '📡',
+      pdf:     'forensic/Analisis Firmware IoT.pdf',
+      tags:    [
+        { label: 'IoT',     cls: 'tag-iot'    },
+        { label: 'Forense', cls: 'tag-forense' },
+        { label: 'Linux',   cls: 'tag-linux'  },
+      ],
+      summary: 'Análisis forense de dos dispositivos IoT con resultados contrastantes. La cámara permitió extracción completa del firmware; la bombilla empleaba cifrado que imposibilitó el análisis.',
+      findings: [
+        'Cámara: sistemas Squashfs (SO) + JFFS2 (configuración)',
+        'Servicios detectados: miio_client, miio_avstreamer, mdev',
+        '11 usuarios listados — root activo, resto con shell deshabilitado',
+        'Bombilla: firmware cifrado → imposible auditar vulnerabilidades',
+        'Falta de transparencia del fabricante = riesgo para el usuario final',
+      ],
+      tools: ['binwalk', 'strings', 'hexdump', 'unsquashfs', 'jefferson'],
+    },
+    {
+      title:   'Proyecto Análisis Forense — iOS 13.4.1',
+      icon:    '📱',
+      pdf:     'forensic/Proyecto Analisis Sistema Operativo IOS.pdf',
+      tags:    [
+        { label: 'Móvil',  cls: 'tag-movil'  },
+        { label: 'iOS',    cls: 'tag-ios'     },
+        { label: 'Forense',cls: 'tag-forense' },
+      ],
+      summary: 'Extracción y análisis forense de un iPhone con iOS 13.4.1. Extracción lógica documentada con cadena de custodia completa y análisis de artefactos mediante iLEAPP.',
+      findings: [
+        'Extracción lógica con iTunes y Magnet Acquire',
+        'Datos extraídos: IMEI, nº serie, iOS versión, teléfono (+1 919 579-4674)',
+        'Número identificado vía Burner Accounts report en iLEAPP',
+        'iLEAPP procesó el volcado 13-4-1.tar → artefactos del sistema',
+        'Permisos de apps analizados: contactos, ubicación, micrófono',
+        'Hashes MD5 y SHA-256 calculados → integridad verificada',
+        'Almacenamiento cifrado siguiendo cadena de custodia',
+      ],
+      tools: ['iLEAPP', 'iTunes', 'Magnet Acquire', 'md5sum', 'sha256sum'],
+    },
+    {
+      title:   'Integridad de Evidencia — Clonación Forense de Pendrive',
+      icon:    '💾',
+      pdf:     'forensic/Integridad Pendrive.pdf',
+      tags:    [
+        { label: 'Forense', cls: 'tag-forense' },
+        { label: 'Linux',   cls: 'tag-linux'   },
+        { label: 'Windows', cls: 'tag-windows'  },
+      ],
+      summary: 'Clonación forense de un pendrive 16 GB comparando metodología en Linux (SIFT) y Windows 10 Pro. Se evaluó la prevención de montaje automático y la validez de los hashes obtenidos.',
+      findings: [
+        'Linux: udisks2 deshabilitado → prevención eficaz de montaje automático',
+        'dc3dd + dd → hashes SHA-256 y SHA-512 idénticos → copia bit-a-bit válida',
+        'Windows: diskpart, mountvol y registro resultaron ineficaces',
+        'Directivas de Grupo (gpedit.msc) → solución más robusta en Windows',
+        'FTK Imager → hashes diferentes a Linux → posible alteración de metadatos',
+        'Conclusión: Linux superior para adquisición forense íntegra',
+      ],
+      tools: ['dc3dd', 'dd', 'FTK Imager', 'SIFT Workstation', 'sha256sum', 'gpedit.msc'],
+    },
+  ];
+  /* ============================================================ */
+
+  /* ── PALETTE ── */
+  const html = document.documentElement;
+  function applyPalette(p) {
+    html.setAttribute('data-palette', p);
+    document.querySelectorAll('.pal-btn').forEach(b => b.classList.toggle('active', b.dataset.p === p));
+    localStorage.setItem('x224-palette', p);
+  }
+  applyPalette(localStorage.getItem('x224-palette') || 'cyber');
+  document.querySelectorAll('.pal-btn').forEach(b => b.addEventListener('click', () => applyPalette(b.dataset.p)));
+
+  /* ── MATRIX RAIN ── */
+  (function(){
+    const canvas = document.getElementById('matrix-canvas');
+    const ctx    = canvas.getContext('2d');
+    function resize(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    resize(); window.addEventListener('resize', resize);
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*<>?/~`';
+    const fSize = 14;
+    let drops = [], dColors = [];
+    function init(){
+      const cols = Math.floor(canvas.width / fSize);
+      drops   = Array.from({length: cols}, () => Math.random() * -100);
+      dColors = drops.map(() => getComputedStyle(html).getPropertyValue('--matrix-color').trim());
+    }
+    init(); window.addEventListener('resize', init);
+    setInterval(() => {
+      const c = getComputedStyle(html).getPropertyValue('--matrix-color').trim();
+      ctx.fillStyle = 'rgba(0,0,0,0.045)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < drops.length; i++){
+        ctx.fillStyle = dColors[i] || c;
+        ctx.font = fSize + 'px JetBrains Mono';
+        ctx.fillText(chars[Math.floor(Math.random() * chars.length)], i * fSize, drops[i] * fSize);
+        if (drops[i] * fSize > canvas.height && Math.random() > 0.96){ drops[i] = 0; dColors[i] = c; }
+        drops[i]++;
+      }
+    }, 45);
+  })();
+
+  /* ── RENDER ── */
+  function renderCases(){
+    const grid = document.getElementById('forensics-grid');
+    CASES.forEach((c, i) => {
+      const card = document.createElement('div');
+      card.className = 'case-card';
+
+      card.innerHTML = `
+        <div class="case-card__banner">
+          <div class="case-card__icon">${c.icon}</div>
+          <div class="case-card__header">
+            <div class="case-card__num">// Caso 0${i + 1}</div>
+            <div class="case-card__title">${c.title}</div>
+            <div class="case-card__tags">
+              ${c.tags.map(t => `<span class="tag ${t.cls}">${t.label}</span>`).join('')}
+            </div>
+          </div>
+        </div>
+
+        <div class="case-card__body">
+          <p class="case-card__summary">${c.summary}</p>
+          <div class="case-card__findings">
+            ${c.findings.map(f => `<div class="finding-item">${f}</div>`).join('')}
+          </div>
+          <div class="case-card__tools">
+            ${c.tools.map(t => `<span class="tool-pill">${t}</span>`).join('')}
+          </div>
+        </div>
+
+        <div class="case-card__footer">
+          <span class="case-card__date">📄 Informe completo disponible</span>
+          <a class="pdf-btn" href="${c.pdf}" target="_blank">
+            ↗ Ver PDF
+          </a>
+        </div>
+      `;
+
+      grid.appendChild(card);
+    });
+  }
+
+  renderCases();
+  </script>
+
+</body>
+</html>

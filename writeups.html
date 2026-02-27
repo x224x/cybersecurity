@@ -9,7 +9,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 
-  <!-- CSS separado -->
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="writeups.css">
 </head>
@@ -18,20 +17,17 @@
   <canvas id="matrix-canvas"></canvas>
   <div class="scanline"></div>
 
-  <!-- ====================================================
-       NAVBAR
-       ==================================================== -->
+  <!-- NAVBAR -->
   <nav class="navbar">
     <a class="navbar__logo" href="index.html">x<em>224</em></a>
-
     <ul class="navbar__nav">
-      <li><a href="index.html">inicio</a></li>
+      <li><a href="index.html#about">whoami</a></li>
+      <li><a href="index.html#sections">secciones</a></li>
+      <li><a href="index.html#terminal">terminal</a></li>
       <li><a href="writeups.html" class="active">writeups</a></li>
       <li><a href="forensics.html">forense</a></li>
-      <li><a href="certifications.html">certs</a></li>
-      <li><a href="tools.html">tools</a></li>
+      <li><a href="certifications.html">certificaciones</a></li>
     </ul>
-
     <div class="palette-switcher" title="Cambiar paleta de colores">
       <button class="pal-btn active" data-p="cyber"  title="Azul Cibernético"></button>
       <button class="pal-btn"       data-p="matrix" title="Verde Matrix"></button>
@@ -43,27 +39,25 @@
 
   <div class="container">
 
-    <!-- ====================================================
-         HEADER
-         ==================================================== -->
+    <!-- HEADER -->
     <header class="page-header">
       <a href="index.html" class="back-link">← Volver al Portfolio</a>
       <h1><span>CTF</span> Writeups</h1>
       <p class="page-header__sub">Documentación completa de máquinas resueltas y técnicas de pentesting</p>
       <div class="header-stats">
-        <div class="header-stat">
-          <strong id="stat-total">0</strong>máquinas totales
+        <div class="header-stat"><strong id="stat-total">0</strong>máquinas totales</div>
+        <div class="header-stat"><strong id="stat-htb">0</strong>Hack The Box</div>
+        <div class="header-stat"><strong id="stat-thm">0</strong>TryHackMe</div>
       </div>
     </header>
 
-    <!-- ====================================================
-         FILTROS Y BÚSQUEDA
-         ==================================================== -->
+    <!-- BÚSQUEDA -->
     <div class="search-bar">
       <span class="search-bar__icon">🔍</span>
       <input type="text" id="searchInput" placeholder="$ buscar por nombre, OS, herramienta o técnica...">
     </div>
 
+    <!-- FILTROS -->
     <div class="filters" id="filterBtns">
       <button class="filter-btn active" data-filter="all">Todos</button>
       <button class="filter-btn" data-filter="easy">Easy</button>
@@ -73,9 +67,7 @@
       <button class="filter-btn" data-filter="linux">Linux</button>
     </div>
 
-    <!-- ====================================================
-         TABLA
-         ==================================================== -->
+    <!-- TABLA -->
     <div class="table-wrap">
       <table id="machinesTable">
         <thead>
@@ -88,16 +80,14 @@
             <th>Técnicas</th>
           </tr>
         </thead>
-        <tbody id="table-body">
-          <!-- Generado por JS -->
-        </tbody>
+        <tbody id="table-body"></tbody>
       </table>
       <p class="no-results" id="noResults">
         No se encontraron resultados para <span id="noResultsQuery"></span>
       </p>
     </div>
 
-  </div><!-- /container -->
+  </div>
 
   <footer>
     <div>
@@ -107,178 +97,45 @@
     <div style="margin-top:0.8rem;">&copy; 2026 x224 · Penetration Testing &amp; Forensics &amp; Cybersecurity</div>
   </footer>
 
-  <!-- ====================================================
-       JAVASCRIPT
-       ==================================================== -->
+  <!-- data.js PRIMERO — define window.MACHINES -->
+  <script src="data.js"></script>
+  <script src="main.js"></script>
   <script>
   /* ============================================================
-     ██████████████████████████████████████████████████████████
-     ██                                                        ██
-     ██   AÑADIR MÁQUINAS AQUÍ — solo edita este array        ██
-     ██                                                        ██
-     ██████████████████████████████████████████████████████████
-
-     Copia y pega un objeto nuevo en el array MACHINES para
-     añadir una nueva máquina. Campos:
-
-       name        → nombre de la máquina
-       difficulty  → "easy" | "medium" | "hard"
-       os          → "windows" | "linux" | "other"
-       platform    → "htb" | "thm" | "other"  (HTB = Hack The Box, THM = TryHackMe)
-       pdf         → ruta al PDF (ej: "writeups/puppy.pdf"). null si no hay PDF.
-       tools       → array de herramientas utilizadas
-       techniques  → array de técnicas aplicadas
-
-     ============================================================ */
-  const MACHINES = [
-
-    {
-      name:       'Puppy',
-      difficulty: 'medium',
-      os:         'windows',
-      platform:   'htb',
-      pdf:        'writeups/puppy.pdf',
-      tools: [
-        'Nmap', 'NetExec', 'Dig', 'Rpcclient',
-        'impacket-GetNPUsers', 'impacket-GetUserSPNs',
-        'Smbmap', 'BloodHound', 'Docker', 'net rpc',
-        'KeePassXC', 'John the Ripper', 'keepass4brute',
-        'LDAP', 'Evil-WinRM', 'WinPEAS', 'impacket-dpapi'
-      ],
-      techniques: [
-        'Enumeration DNS, SMB, Kerberos, LDAP',
-        'Net rpc (add group / change password)',
-        'Abuse Generic Write & GenericAll rights',
-        'Abuse DPAPI',
-        'Dump Domain Hashes'
-      ]
-    },
-
-    // ─── EJEMPLO: descomenta y edita para añadir más ─────────
-    // {
-    //   name:       'BoardLight',
-    //   difficulty: 'easy',
-    //   os:         'linux',
-    //   platform:   'htb',
-    //   pdf:        'writeups/boardlight.pdf',
-    //   tools:      ['Nmap', 'Gobuster', 'Dolibarr', 'LinPEAS'],
-    //   techniques: ['Web Enumeration', 'RCE via Dolibarr', 'SUID Abuse']
-    // },
-
-  ];
-  /* ============================================================
-     FIN DE LA CONFIGURACIÓN — no tocar lo de abajo
+     WRITEUPS.JS — usa window.MACHINES de data.js
+     Para añadir máquinas: edita data.js
      ============================================================ */
 
+  const MACHINES = window.MACHINES || [];
 
-  /* -------------------------------------------------------
-     PALETTE SWITCHER
-     ------------------------------------------------------- */
-  const html = document.documentElement;
+  const OS_LABEL   = { windows: '🪟 Windows', linux: '🐧 Linux', other: '❓ Other' };
+  const PLAT_LABEL = { htb: 'Hack The Box',  thm: 'TryHackMe',  other: 'Other'    };
 
-  function applyPalette(p) {
-    html.setAttribute('data-palette', p);
-    document.querySelectorAll('.pal-btn').forEach(b => {
-      b.classList.toggle('active', b.dataset.p === p);
-    });
-    localStorage.setItem('x224-palette', p);
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
-
-  const savedPal = localStorage.getItem('x224-palette') || 'cyber';
-  applyPalette(savedPal);
-
-  document.querySelectorAll('.pal-btn').forEach(btn => {
-    btn.addEventListener('click', () => applyPalette(btn.dataset.p));
-  });
-
-
-  /* -------------------------------------------------------
-     MATRIX RAIN
-     ------------------------------------------------------- */
-  (function(){
-    const canvas = document.getElementById('matrix-canvas');
-    const ctx    = canvas.getContext('2d');
-    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-    resize(); window.addEventListener('resize', resize);
-
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*<>?/~`';
-    const fSize = 14;
-    let drops = [], dColors = [];
-
-    function init() {
-      const cols = Math.floor(canvas.width / fSize);
-      drops   = Array.from({length: cols}, () => Math.random() * -100);
-      dColors = drops.map(() => getComputedStyle(html).getPropertyValue('--matrix-color').trim());
-    }
-    init(); window.addEventListener('resize', init);
-
-    setInterval(() => {
-      const c = getComputedStyle(html).getPropertyValue('--matrix-color').trim();
-      ctx.fillStyle = 'rgba(0,0,0,0.045)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      for (let i = 0; i < drops.length; i++) {
-        ctx.fillStyle = dColors[i] || c;
-        ctx.font = fSize + 'px JetBrains Mono';
-        ctx.fillText(chars[Math.floor(Math.random() * chars.length)], i * fSize, drops[i] * fSize);
-        if (drops[i] * fSize > canvas.height && Math.random() > 0.96) { drops[i] = 0; dColors[i] = c; }
-        drops[i]++;
-      }
-    }, 45);
-  })();
-
-
-  /* -------------------------------------------------------
-     RENDERIZAR TABLA
-     ------------------------------------------------------- */
-  const OS_LABEL = { windows: '🪟 Windows', linux: '🐧 Linux', other: '❓ Other' };
-  const PLAT_LABEL = { htb: 'Hack The Box', thm: 'TryHackMe', other: 'Other' };
 
   function renderRow(m) {
-    const diffClass = m.difficulty; // easy | medium | hard
     const tr = document.createElement('tr');
-    tr.setAttribute('data-diff', m.difficulty);
-    tr.setAttribute('data-os',   m.os);
+    tr.dataset.diff = m.difficulty;
+    tr.dataset.os   = m.os;
+    if (m.pdf) tr.addEventListener('click', () => window.open(m.pdf, '_blank'));
 
-    if (m.pdf) {
-      tr.style.cursor = 'pointer';
-      tr.addEventListener('click', () => window.open(m.pdf, '_blank'));
-    }
-
-    // ── Nombre ──
-    const tdName = document.createElement('td');
-    tdName.innerHTML = `
-      <div class="machine-name">
-        <span class="machine-dot"></span>
-        ${escapeHtml(m.name)}
-        ${m.pdf ? '<span style="color:var(--text-muted);font-size:0.75rem;margin-left:4px" title="PDF disponible">📄</span>' : ''}
-      </div>`;
-
-    // ── Dificultad ──
-    const tdDiff = document.createElement('td');
-    tdDiff.innerHTML = `<span class="badge badge-${diffClass}">${m.difficulty.charAt(0).toUpperCase() + m.difficulty.slice(1)}</span>`;
-
-    // ── OS ──
-    const tdOs = document.createElement('td');
-    tdOs.innerHTML = `<span class="os-badge">${OS_LABEL[m.os] || m.os}</span>`;
-
-    // ── Plataforma ──
-    const tdPlat = document.createElement('td');
-    tdPlat.innerHTML = `<span style="color:var(--text-2);font-size:0.82rem">${PLAT_LABEL[m.platform] || m.platform}</span>`;
-
-    // ── Herramientas ──
-    const tdTools = document.createElement('td');
-    tdTools.innerHTML = `<div class="tools-list">${m.tools.map(t => `<span class="tool-tag">${escapeHtml(t)}</span>`).join('')}</div>`;
-
-    // ── Técnicas ──
-    const tdTech = document.createElement('td');
-    tdTech.innerHTML = `<div class="techniques-list">${m.techniques.map(t => `<div class="technique-item">${escapeHtml(t)}</div>`).join('')}</div>`;
-
-    tr.append(tdName, tdDiff, tdOs, tdPlat, tdTools, tdTech);
+    tr.innerHTML = `
+      <td>
+        <div class="machine-name">
+          <span class="machine-dot"></span>
+          ${escHtml(m.name)}
+          ${m.pdf ? '<span style="color:var(--text-muted);font-size:0.75rem;margin-left:4px" title="PDF disponible">📄</span>' : ''}
+        </div>
+      </td>
+      <td><span class="badge badge-${m.difficulty}">${m.difficulty.charAt(0).toUpperCase() + m.difficulty.slice(1)}</span></td>
+      <td><span class="os-badge">${OS_LABEL[m.os] || escHtml(m.os)}</span></td>
+      <td><span style="color:var(--text-2);font-size:0.82rem">${PLAT_LABEL[m.platform] || escHtml(m.platform)}</span></td>
+      <td><div class="tools-list">${m.tools.map(t => `<span class="tool-tag">${escHtml(t)}</span>`).join('')}</div></td>
+      <td><div class="techniques-list">${m.techniques.map(t => `<div class="technique-item">${escHtml(t)}</div>`).join('')}</div></td>
+    `;
     return tr;
-  }
-
-  function escapeHtml(s) {
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
   function populate(list) {
@@ -289,50 +146,32 @@
 
   populate(MACHINES);
 
-  // ── Stats ──
   document.getElementById('stat-total').textContent = MACHINES.length;
   document.getElementById('stat-htb').textContent   = MACHINES.filter(m => m.platform === 'htb').length;
   document.getElementById('stat-thm').textContent   = MACHINES.filter(m => m.platform === 'thm').length;
 
-
-  /* -------------------------------------------------------
-     BÚSQUEDA + FILTROS
-     ------------------------------------------------------- */
+  /* ── Búsqueda + filtros ── */
   let activeFilter = 'all';
   let searchTerm   = '';
 
-  function filtered() {
+  function getFiltered() {
     return MACHINES.filter(m => {
-      const matchFilter =
-        activeFilter === 'all'     ? true :
-        activeFilter === 'easy'    ? m.difficulty === 'easy' :
-        activeFilter === 'medium'  ? m.difficulty === 'medium' :
-        activeFilter === 'hard'    ? m.difficulty === 'hard' :
-        activeFilter === 'windows' ? m.os === 'windows' :
-        activeFilter === 'linux'   ? m.os === 'linux' : true;
-
-      const haystack = [
-        m.name, m.difficulty, m.os, m.platform,
-        ...m.tools, ...m.techniques
-      ].join(' ').toLowerCase();
-
-      const matchSearch = !searchTerm || haystack.includes(searchTerm.toLowerCase());
-      return matchFilter && matchSearch;
+      const ok = activeFilter === 'all'     ? true :
+                 activeFilter === 'windows' ? m.os === 'windows' :
+                 activeFilter === 'linux'   ? m.os === 'linux'   :
+                 m.difficulty === activeFilter;
+      const hay = [m.name, m.difficulty, m.os, m.platform, ...m.tools, ...m.techniques]
+                    .join(' ').toLowerCase();
+      return ok && (!searchTerm || hay.includes(searchTerm.toLowerCase()));
     });
   }
 
   function update() {
-    const list = filtered();
+    const list = getFiltered();
     populate(list);
-
     const noRes = document.getElementById('noResults');
-    const wrap  = document.querySelector('.table-wrap');
-    if (list.length === 0) {
-      noRes.style.display = 'block';
-      document.getElementById('noResultsQuery').textContent = `"${searchTerm || activeFilter}"`;
-    } else {
-      noRes.style.display = 'none';
-    }
+    noRes.style.display = list.length === 0 ? 'block' : 'none';
+    document.getElementById('noResultsQuery').textContent = `"${searchTerm || activeFilter}"`;
   }
 
   document.getElementById('searchInput').addEventListener('input', e => {
@@ -347,7 +186,7 @@
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b === btn));
     update();
   });
-
   </script>
+
 </body>
 </html>

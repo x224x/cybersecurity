@@ -9,13 +9,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 
-  <!-- CSS separado -->
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="index.css">
 </head>
 <body>
 
-  <!-- Canvas matriz de fondo -->
   <canvas id="matrix-canvas"></canvas>
   <div class="scanline"></div>
 
@@ -26,18 +24,19 @@
     <a class="navbar__logo" href="index.html">x<em>224</em></a>
 
     <ul class="navbar__nav">
-      <li><a href="#about">whoami</a></li>
-      <li><a href="#sections">secciones</a></li>
-      <li><a href="#terminal">terminal</a></li>
+      <li><a href="index.html#about">whoami</a></li>
+      <li><a href="index.html#sections">secciones</a></li>
+      <li><a href="index.html#terminal">terminal</a></li>
       <li><a href="writeups.html">writeups</a></li>
+      <li><a href="forensics.html">forense</a></li>
+      <li><a href="certifications.html">certificaciones</a></li>
     </ul>
 
-    <!-- Selector de paleta de colores -->
     <div class="palette-switcher" title="Cambiar paleta de colores">
-      <button class="pal-btn"       data-p="purple" title="Púrpura Neon"></button>
-      <button class="pal-btn"       data-p="matrix" title="Verde Matrix"></button>
-      <button class="pal-btn"       data-p="red"    title="Rojo Sangre"></button>
-      <button class="pal-btn"       data-p="amber"  title="Ámbar Hacker"></button>
+      <button class="pal-btn"        data-p="purple" title="Púrpura Neon"></button>
+      <button class="pal-btn"        data-p="matrix" title="Verde Matrix"></button>
+      <button class="pal-btn"        data-p="red"    title="Rojo Sangre"></button>
+      <button class="pal-btn"        data-p="amber"  title="Ámbar Hacker"></button>
       <button class="pal-btn active" data-p="cyber"  title="Azul Cibernético"></button>
     </div>
   </nav>
@@ -60,9 +59,16 @@
           Este portfolio documenta mi trayectoria en pentesting, análisis forense
           y CTF challenges.<span class="cursor"></span>
         </p>
+        <div class="hero__btns">
+          <a href="#sections" class="btn btn-primary">Explorar secciones</a>
+          <a href="#terminal" class="btn btn-outline">$ terminal</a>
+        </div>
       </div>
     </div>
   </section>
+
+  <div class="container">
+
     <!-- ====================================================
          SECCIONES / TARJETAS
          ==================================================== -->
@@ -78,14 +84,14 @@
         </a>
 
         <a href="forensics.html" class="nav-card">
-          <span class="nav-card__badge badge badge-soon">Soon</span>
+          <span class="nav-card__badge badge badge-active">Active</span>
           <div class="nav-card__icon">🔍</div>
           <h3 class="nav-card__title">Análisis Forense</h3>
           <p class="nav-card__desc">Reportes de investigaciones forenses digitales, análisis de malware y reconstrucción de incidentes de seguridad.</p>
         </a>
 
         <a href="certifications.html" class="nav-card">
-          <span class="nav-card__badge badge badge-soon">Soon</span>
+          <span class="nav-card__badge badge badge-active">Active</span>
           <div class="nav-card__icon">🎓</div>
           <h3 class="nav-card__title">Certificaciones</h3>
           <p class="nav-card__desc">Credenciales profesionales, formación continua y validación de competencias en diferentes áreas de ciberseguridad.</p>
@@ -115,6 +121,7 @@
       <div class="section-title">// Terminal Interactiva</div>
 
       <div class="terminal-window">
+        <!-- Barra de título -->
         <div class="terminal-titlebar">
           <div class="terminal-titlebar__dots">
             <span></span><span></span><span></span>
@@ -122,23 +129,35 @@
           <div class="terminal-titlebar__label">x224@portfolio — bash</div>
         </div>
 
-        <div class="terminal-body" id="terminal-output">
-          <!-- Salida generada por JS -->
-        </div>
+        <!-- Salida -->
+        <div class="terminal-body" id="terminal-output"></div>
 
+        <!-- Línea de entrada -->
         <div class="terminal-input-row">
           <span class="t-prompt">
-            <span class="t-user">x224</span><span class="t-sym">@</span><span class="t-host">portfolio</span><span class="t-sym">:</span><span class="t-path" id="prompt-path">~</span><span class="t-sym">$</span>&nbsp;
+            <span class="t-user">x224</span><span class="t-sym">@</span><span
+            class="t-host">portfolio</span><span class="t-sym">:</span><span
+            class="t-path" id="prompt-path">~</span><span class="t-sym">$</span>&nbsp;
           </span>
-          <input type="text" id="term-input" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="escribe un comando...">
+          <input
+            type="text"
+            id="term-input"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+            placeholder="escribe un comando...">
         </div>
 
+        <!-- Ayuda rápida -->
         <div class="terminal-help-hint">
-          Comandos disponibles: <strong>ls</strong>, <strong>cd &lt;dir&gt;</strong>, <strong>pwd</strong>, <strong>whoami</strong>, <strong>help</strong>, <strong>clear</strong>
+          <strong>help</strong> · <strong>ls [ruta]</strong> · <strong>cd &lt;dir&gt;</strong> · <strong>cat &lt;archivo&gt;</strong> · <strong>pwd</strong> · <strong>clear</strong> · <strong>Tab</strong> autocompleta
         </div>
       </div>
     </section>
-  </div>
+
+  </div><!-- /container -->
+
   <!-- ====================================================
        FOOTER
        ==================================================== -->
@@ -151,288 +170,12 @@
   </footer>
 
   <!-- ====================================================
-       JAVASCRIPT
+       SCRIPTS
+       Orden importante: data.js primero, luego main.js y terminal.js
        ==================================================== -->
-  <script>
-  /* -------------------------------------------------------
-     PALETTE SWITCHER — persiste con localStorage
-     ------------------------------------------------------- */
-  const html = document.documentElement;
-
-  function applyPalette(p) {
-    html.setAttribute('data-palette', p);
-    document.querySelectorAll('.pal-btn').forEach(b => {
-      b.classList.toggle('active', b.dataset.p === p);
-    });
-    localStorage.setItem('x224-palette', p);
-  }
-
-  // Restaurar paleta guardada
-  const savedPal = localStorage.getItem('x224-palette') || 'cyber';
-  applyPalette(savedPal);
-
-  document.querySelectorAll('.pal-btn').forEach(btn => {
-    btn.addEventListener('click', () => applyPalette(btn.dataset.p));
-  });
-
-  /* -------------------------------------------------------
-     MATRIX RAIN
-     ------------------------------------------------------- */
-  (function(){
-    const canvas = document.getElementById('matrix-canvas');
-    const ctx    = canvas.getContext('2d');
-
-    function resize() {
-      canvas.width  = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    resize();
-    window.addEventListener('resize', resize);
-
-    const chars   = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+-=[]{}|<>?/~`';
-    const fSize   = 14;
-    let   drops   = [];
-    let   dColors = [];
-
-    function init() {
-      const cols = Math.floor(canvas.width / fSize);
-      drops   = Array.from({length: cols}, () => Math.random() * -100);
-      dColors = drops.map(() => getComputedStyle(html).getPropertyValue('--matrix-color').trim());
-    }
-    init();
-    window.addEventListener('resize', init);
-
-    function draw() {
-      const accentColor = getComputedStyle(html).getPropertyValue('--matrix-color').trim();
-      ctx.fillStyle = 'rgba(0,0,0,0.045)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      for (let i = 0; i < drops.length; i++) {
-        const char = chars[Math.floor(Math.random() * chars.length)];
-        ctx.fillStyle = dColors[i] || accentColor;
-        ctx.font = fSize + 'px JetBrains Mono';
-        ctx.fillText(char, i * fSize, drops[i] * fSize);
-
-        if (drops[i] * fSize > canvas.height && Math.random() > 0.96) {
-          drops[i] = 0;
-          dColors[i] = accentColor;
-        }
-        drops[i]++;
-      }
-    }
-
-    setInterval(draw, 45);
-  })();
-
-  /* -------------------------------------------------------
-     TERMINAL INTERACTIVA
-     ------------------------------------------------------- */
-  (function(){
-    // ── ESTRUCTURA DE DIRECTORIOS ──────────────────────────
-    const FS = {
-      '~': {
-        type: 'dir',
-        children: {
-          'writeups':      { type: 'dir', link: 'writeups.html',      children: { 'puppy.pdf': { type: 'file' } } },
-          'forensics':     { type: 'dir', link: 'forensics.html',     children: {} },
-          'certs':         { type: 'dir', link: 'certifications.html',children: {} },
-          'tools':         { type: 'dir', link: 'tools.html',         children: {} },
-          'resources':     { type: 'dir', link: 'resources.html',     children: {} },
-          'README.md':     { type: 'file' },
-        }
-      }
-    };
-
-    let cwd    = '~';   // directorio actual
-    let cwdObj = FS['~'];
-    let history = [];
-    let histIdx = -1;
-
-    const output  = document.getElementById('terminal-output');
-    const input   = document.getElementById('term-input');
-    const pathLbl = document.getElementById('prompt-path');
-
-    function getAccent() {
-      return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
-    }
-
-    function print(html, cls) {
-      const el = document.createElement('div');
-      el.className = 'terminal-line ' + (cls || 't-output');
-      el.innerHTML = html;
-      output.appendChild(el);
-      output.scrollTop = output.scrollHeight;
-    }
-
-    function printPrompt(cmd) {
-      print(`<span class="t-user">x224</span><span class="t-sym">@</span><span class="t-host">portfolio</span><span class="t-sym">:</span><span class="t-path">${cwd}</span><span class="t-sym">$</span> <span style="color:var(--text)">${escapeHtml(cmd)}</span>`, 't-prompt');
-    }
-
-    function escapeHtml(s) {
-      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
-
-    // ── MENSAJE DE BIENVENIDA ──────────────────────────────
-    print(`<span class="t-info">╔══════════════════════════════════════════╗</span>`);
-    print(`<span class="t-info">║  x224 · CyberSec Portfolio               ║</span>`);
-    print(`<span class="t-info">╚══════════════════════════════════════════╝</span>`);
-    print(`<span class="t-success">Sistema iniciado correctamente.</span>`);
-    print(`Escribe <span class="t-info">help</span> para ver los comandos disponibles.`);
-    print('');
-
-    // ── COMANDOS ────────────────────────────────────────────
-    const COMMANDS = {
-
-      help() {
-        print(`<span class="t-info">Comandos disponibles:</span>`);
-        print(`  <span class="t-info">ls</span>         — listar contenido del directorio actual`);
-        print(`  <span class="t-info">cd &lt;dir&gt;</span>   — entrar en un directorio (o ir a la página)`);
-        print(`  <span class="t-info">cd ..</span>      — subir un nivel`);
-        print(`  <span class="t-info">pwd</span>        — mostrar ruta actual`);
-        print(`  <span class="t-info">whoami</span>     — mostrar usuario`);
-        print(`  <span class="t-info">clear</span>      — limpiar terminal`);
-        print('');
-      },
-
-      ls() {
-        const kids = cwdObj.children || {};
-        const dirs  = Object.entries(kids).filter(([,v]) => v.type === 'dir');
-        const files = Object.entries(kids).filter(([,v]) => v.type !== 'dir');
-
-        if (dirs.length === 0 && files.length === 0) {
-          print('<span class="t-muted">directorio vacío</span>');
-          return;
-        }
-        dirs.forEach(([name, v]) => {
-          const arrow = v.link ? ` <span class="t-success">→ ${v.link}</span>` : '';
-          print(`  <span class="t-dir">📁 ${name}/</span>${arrow}`);
-        });
-        files.forEach(([name]) => {
-          print(`  <span class="t-file">📄 ${name}</span>`);
-        });
-        print('');
-      },
-
-      pwd() {
-        const full = cwd === '~' ? '/home/x224' : '/home/x224/' + cwd.replace('~/','');
-        print(`<span class="t-output">${full}</span>`);
-        print('');
-      },
-
-      whoami() {
-        print(`<span class="t-success">x224</span>`);
-        print(`<span class="t-output">Offensive Security Researcher · CTF Player · Portfolio en construcción</span>`);
-        print('');
-      },
-
-      clear() {
-        output.innerHTML = '';
-      },
-
-      cd(args) {
-        const target = args[0] || '~';
-
-        if (target === '..' || target === '') {
-          // Subir a raíz
-          cwd    = '~';
-          cwdObj = FS['~'];
-          pathLbl.textContent = cwd;
-          return;
-        }
-
-        const kids = cwdObj.children || {};
-        const node = kids[target];
-
-        if (!node) {
-          print(`<span class="t-error">bash: cd: ${escapeHtml(target)}: No existe el directorio</span>`);
-          return;
-        }
-
-        if (node.type !== 'dir') {
-          print(`<span class="t-error">bash: cd: ${escapeHtml(target)}: No es un directorio</span>`);
-          return;
-        }
-
-        // Si tiene enlace → navegar a esa página
-        if (node.link) {
-          print(`<span class="t-success">Navegando a ${node.link}...</span>`);
-          setTimeout(() => { window.location.href = node.link; }, 600);
-          return;
-        }
-
-        cwd    = cwd === '~' ? `~/${target}` : `${cwd}/${target}`;
-        cwdObj = node;
-        pathLbl.textContent = cwd;
-        print('');
-      }
-    };
-
-    // ── EJECUTAR COMANDO ─────────────────────────────────────
-    function runCmd(raw) {
-      const trimmed = raw.trim();
-      if (!trimmed) return;
-
-      history.unshift(trimmed);
-      histIdx = -1;
-
-      printPrompt(trimmed);
-
-      const parts   = trimmed.split(/\s+/);
-      const cmd     = parts[0].toLowerCase();
-      const args    = parts.slice(1);
-
-      if (COMMANDS[cmd]) {
-        COMMANDS[cmd](args);
-      } else {
-        print(`<span class="t-error">bash: ${escapeHtml(cmd)}: comando no encontrado</span>`);
-        print(`Escribe <span class="t-info">help</span> para ver los comandos disponibles.`);
-        print('');
-      }
-    }
-
-    // ── EVENTOS ───────────────────────────────────────────────
-    input.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        const val = input.value;
-        input.value = '';
-        runCmd(val);
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        if (histIdx < history.length - 1) histIdx++;
-        input.value = history[histIdx] || '';
-      } else if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        if (histIdx > 0) histIdx--;
-        else { histIdx = -1; input.value = ''; return; }
-        input.value = history[histIdx] || '';
-      } else if (e.key === 'Tab') {
-        e.preventDefault();
-        // Autocompletado básico
-        const partial = input.value.trim();
-        const spaceIdx = partial.indexOf(' ');
-        if (spaceIdx !== -1) {
-          const typed   = partial.slice(spaceIdx + 1);
-          const kids    = Object.keys(cwdObj.children || {});
-          const matches = kids.filter(k => k.startsWith(typed));
-          if (matches.length === 1) {
-            input.value = partial.slice(0, spaceIdx + 1) + matches[0];
-          }
-        }
-      }
-    });
-
-    // Click en el terminal → enfocar input
-    document.getElementById('terminal-output').addEventListener('click', () => input.focus());
-    document.querySelector('.terminal-input-row').addEventListener('click', () => input.focus());
-
-    // Auto-foco al hacer scroll a la sección
-    const obs = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) input.focus();
-    }, { threshold: 0.5 });
-    obs.observe(document.getElementById('terminal'));
-
-  })();
-  </script>
+  <script src="data.js"></script>
+  <script src="main.js"></script>
+  <script src="terminal.js"></script>
 
 </body>
 </html>
