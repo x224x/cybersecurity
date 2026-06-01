@@ -1,0 +1,387 @@
+/* ================================================================
+   DATA.JS — FUENTE ÚNICA DE DATOS  (single source of truth)
+   ================================================================
+   ⚠️  EDITA SOLO ESTE ARCHIVO para añadir contenido.
+   Todo se actualiza automáticamente y a la vez en:
+     ✓ writeups.html       → tabla de máquinas       (window.MACHINES)
+     ✓ forensics.html      → tarjetas de casos        (window.FORENSIC_CASES)
+     ✓ certifications.html → tarjetas de certs        (window.CERTS)
+     ✓ resources.html      → tarjetas de conceptos    (window.CONCEPTS)
+     ✓ Terminal interactiva → ls/cat de cada sección
+   ----------------------------------------------------------------
+   NOTA: una web estática NO puede leer el contenido de una carpeta
+   desde el navegador. Por eso el "índice" del contenido vive aquí.
+   Para el flujo "suelto un archivo y se añade solo" usa el script
+   opcional  tools/build-data.mjs  (ver README al final del archivo).
+   ================================================================ */
+
+
+/* ════════════════════════════════════════════════════════════════
+   1) WRITEUPS  — una entrada por máquina resuelta
+   ════════════════════════════════════════════════════════════════
+   Campos:
+     name        nombre de la máquina
+     difficulty  'easy' | 'medium' | 'hard'
+     os          'windows' | 'linux' | 'other'
+     platform    'htb' | 'thm' | 'other'
+     pdf         ruta al PDF dentro de writeups/  (o null)
+     tools       array de herramientas
+     techniques  array de técnicas
+   El orden del array = el orden en la tabla (lo nuevo arriba). */
+window.MACHINES = [
+
+  {
+    name:       'Puppy',
+    difficulty: 'medium',
+    os:         'windows',
+    platform:   'htb',
+    pdf:        'writeups/puppy.pdf',
+    tools: [
+      'Nmap', 'NetExec', 'Dig', 'Rpcclient',
+      'impacket-GetNPUsers', 'impacket-GetUserSPNs',
+      'Smbmap', 'BloodHound', 'Docker', 'net rpc',
+      'KeePassXC', 'John the Ripper', 'keepass4brute',
+      'LDAP', 'Evil-WinRM', 'WinPEAS', 'impacket-dpapi'
+    ],
+    techniques: [
+      'Enumeration DNS, SMB, Kerberos, LDAP',
+      'Net rpc (add group / change password)',
+      'Abuse Generic Write & GenericAll rights',
+      'Abuse DPAPI',
+      'Dump Domain Hashes'
+    ]
+  },
+
+  // ── Plantilla para una nueva máquina ─────────────────────────
+  // {
+  //   name:       'BoardLight',
+  //   difficulty: 'easy',
+  //   os:         'linux',
+  //   platform:   'htb',
+  //   pdf:        'writeups/boardlight.pdf',
+  //   tools:      ['Nmap', 'Gobuster', 'Dolibarr', 'LinPEAS'],
+  //   techniques: ['Web Enumeration', 'RCE via Dolibarr', 'SUID Abuse']
+  // },
+
+];
+
+
+/* ════════════════════════════════════════════════════════════════
+   2) CASOS FORENSES  — usado por forensics.html Y por la terminal
+   ════════════════════════════════════════════════════════════════
+   Campos:
+     filename   nombre "de fichero" que se ve en la terminal (sin espacios)
+     title      título del informe (lo que se ve en la tarjeta)
+     icon       emoji representativo
+     pdf         ruta al PDF dentro de forensic/
+     tags        array {label, cls}  (clases: tag-iot, tag-forense,
+                 tag-memoria, tag-movil, tag-windows, tag-linux,
+                 tag-ios, tag-malware, tag-red)
+     summary     descripción breve (1-2 frases)
+     findings    array de hallazgos clave (bullets)
+     tools       array de herramientas */
+window.FORENSIC_CASES = [
+  {
+    filename: 'Volcado_Memoria_Windows.pdf',
+    title:    'Volcado de Memoria — Análisis de Ataque Multivectorial',
+    icon:     '🧠',
+    pdf:      'forensic/Volcado Memoria de Windows.pdf',
+    tags: [
+      { label: 'Memoria RAM', cls: 'tag-memoria' },
+      { label: 'Windows',     cls: 'tag-windows' },
+      { label: 'Malware',     cls: 'tag-malware' },
+      { label: 'Red',         cls: 'tag-red'     },
+    ],
+    summary: 'Análisis de un volcado de memoria RAM de un servidor Windows con DVWA comprometido. Se reconstruyó un ataque multivectorial completo: desde reconocimiento hasta persistencia y limpieza de huellas.',
+    findings: [
+      'LFI explotado para leer hosts y configuración de phpMyAdmin',
+      'SQLi con SQLmap → webshell tmpukudk.php vía INTO OUTFILE',
+      'Inyección de comandos mediante operador && en /vulnerabilities/exec/',
+      'Webshells subidos: c99.php, phpshell.php, phpshell2.php (reverse shell)',
+      'Usuarios creados: hacker, user1 → grupo "Remote Desktop Users"',
+      'RDP habilitado via netsh para acceso persistente',
+      'IP atacante identificada: 192.168.56.102',
+    ],
+    tools: ['Volatility', 'SQLmap', 'DVWA', 'Wireshark', 'strings', 'grep'],
+  },
+  {
+    filename: 'Analisis_Firmware_IoT.pdf',
+    title:    'Análisis de Firmware IoT — Cámara y Bombilla',
+    icon:     '📡',
+    pdf:      'forensic/Analisis Firmware IoT.pdf',
+    tags: [
+      { label: 'IoT',     cls: 'tag-iot'    },
+      { label: 'Forense', cls: 'tag-forense' },
+      { label: 'Linux',   cls: 'tag-linux'  },
+    ],
+    summary: 'Análisis forense de dos dispositivos IoT con resultados contrastantes. La cámara permitió extracción completa del firmware; la bombilla empleaba cifrado que imposibilitó el análisis.',
+    findings: [
+      'Cámara: sistemas Squashfs (SO) + JFFS2 (configuración)',
+      'Servicios detectados: miio_client, miio_avstreamer, mdev',
+      '11 usuarios listados — root activo, resto con shell deshabilitado',
+      'Bombilla: firmware cifrado → imposible auditar vulnerabilidades',
+      'Falta de transparencia del fabricante = riesgo para el usuario final',
+    ],
+    tools: ['binwalk', 'strings', 'hexdump', 'unsquashfs', 'jefferson'],
+  },
+  {
+    filename: 'Analisis_iOS_13.4.1.pdf',
+    title:    'Proyecto Análisis Forense — iOS 13.4.1',
+    icon:     '📱',
+    pdf:      'forensic/Proyecto Analisis Sistema Operativo IOS.pdf',
+    tags: [
+      { label: 'Móvil',   cls: 'tag-movil'  },
+      { label: 'iOS',     cls: 'tag-ios'     },
+      { label: 'Forense', cls: 'tag-forense' },
+    ],
+    summary: 'Extracción y análisis forense de un iPhone con iOS 13.4.1. Extracción lógica documentada con cadena de custodia completa y análisis de artefactos mediante iLEAPP.',
+    findings: [
+      'Extracción lógica con iTunes y Magnet Acquire',
+      'Datos extraídos: IMEI, nº serie, iOS versión, teléfono (+1 919 579-4674)',
+      'Número identificado vía Burner Accounts report en iLEAPP',
+      'iLEAPP procesó el volcado 13-4-1.tar → artefactos del sistema',
+      'Permisos de apps analizados: contactos, ubicación, micrófono',
+      'Hashes MD5 y SHA-256 calculados → integridad verificada',
+      'Almacenamiento cifrado siguiendo cadena de custodia',
+    ],
+    tools: ['iLEAPP', 'iTunes', 'Magnet Acquire', 'md5sum', 'sha256sum'],
+  },
+  {
+    filename: 'Integridad_Pendrive.pdf',
+    title:    'Integridad de Evidencia — Clonación Forense de Pendrive',
+    icon:     '💾',
+    pdf:      'forensic/Integridad Pendrive.pdf',
+    tags: [
+      { label: 'Forense', cls: 'tag-forense' },
+      { label: 'Linux',   cls: 'tag-linux'   },
+      { label: 'Windows', cls: 'tag-windows'  },
+    ],
+    summary: 'Clonación forense de un pendrive 16 GB comparando metodología en Linux (SIFT) y Windows 10 Pro. Se evaluó la prevención de montaje automático y la validez de los hashes obtenidos.',
+    findings: [
+      'Linux: udisks2 deshabilitado → prevención eficaz de montaje automático',
+      'dc3dd + dd → hashes SHA-256 y SHA-512 idénticos → copia bit-a-bit válida',
+      'Windows: diskpart, mountvol y registro resultaron ineficaces',
+      'Directivas de Grupo (gpedit.msc) → solución más robusta en Windows',
+      'FTK Imager → hashes diferentes a Linux → posible alteración de metadatos',
+      'Conclusión: Linux superior para adquisición forense íntegra',
+    ],
+    tools: ['dc3dd', 'dd', 'FTK Imager', 'SIFT Workstation', 'sha256sum', 'gpedit.msc'],
+  },
+];
+
+
+/* ════════════════════════════════════════════════════════════════
+   3) CERTIFICACIONES  — lo más reciente primero
+   ════════════════════════════════════════════════════════════════
+   Campos:
+     name      nombre completo
+     short     nombre corto (para timeline / terminal)
+     issuer    organismo emisor
+     img       ruta a la imagen (.png) o documento (.pdf) en certs/
+               · si es .pdf se renderiza una vista previa de la 1ª página
+     date      fecha legible (ej: "30 may 2026")
+     category  'pentest' | 'security' | 'cloud' | 'microsoft'
+     verify    URL de verificación o null */
+window.CERTS = [
+  {
+    name:     'CRTO — Certified Red Team Operator',
+    short:    'CRTO',
+    issuer:   'Zero-Point Security',
+    img:      'certs/CRTO.pdf',
+    date:     '30 may 2026',
+    category: 'pentest',
+    verify:   null,
+  },
+  {
+    name:     'eCPPT v3 — Certified Professional Penetration Tester',
+    short:    'eCPPTv3',
+    issuer:   'eLearnSecurity · INE',
+    img:      'certs/eCPPTv3.png',
+    date:     '26 feb 2026',
+    category: 'pentest',
+    verify:   null,
+  },
+  {
+    name:     'eJPT v2 — eLearnSecurity Junior Penetration Tester',
+    short:    'eJPTv2',
+    issuer:   'eLearnSecurity · INE',
+    img:      'certs/eJPTv2.png',
+    date:     '25 dic 2025',
+    category: 'pentest',
+    verify:   null,
+  },
+  {
+    name:     'CEH v13 — Certified Ethical Hacker',
+    short:    'CEHv13',
+    issuer:   'EC-Council',
+    img:      'certs/CEHv13.png',
+    date:     '18 nov 2025',
+    category: 'security',
+    verify:   null,
+  },
+  {
+    name:     'AWS Certified Cloud Practitioner',
+    short:    'AWS CCP',
+    issuer:   'Amazon Web Services',
+    img:      'certs/AWSCloudPractitioner.png',
+    date:     '30 jun 2025',
+    category: 'cloud',
+    verify:   null,
+  },
+  {
+    name:     'SC-900 — Microsoft Security Fundamentals',
+    short:    'SC-900',
+    issuer:   'Microsoft',
+    img:      'certs/SC-900.png',
+    date:     '6 mar 2025',
+    category: 'cloud',
+    verify:   null,
+  },
+  {
+    name:     'CCST Cybersecurity',
+    short:    'CCST',
+    issuer:   'Cisco',
+    img:      'certs/CCST.png',
+    date:     '14 ene 2025',
+    category: 'security',
+    verify:   null,
+  },
+];
+
+
+/* ════════════════════════════════════════════════════════════════
+   4) CONCEPTOS  — base de conocimiento (resources.html)
+   ════════════════════════════════════════════════════════════════
+   Cada concepto es como una "carpeta" con su contenido.
+   Campos:
+     id        identificador único (sin espacios) → se usa en la URL y la terminal
+     title     título visible
+     icon      emoji
+     category  agrupador (ej: 'Active Directory', 'Web', 'Forense'...)
+     summary   resumen de 1 frase para la tarjeta
+     tags      array de strings (etiquetas)
+     body      contenido en HTML  (se muestra en un panel al hacer clic)
+               -- o bien --
+     file      ruta a un archivo en recursos/  (ej: 'recursos/kerberos.html')
+               Si pones 'file', se abre ese archivo y se ignora 'body'.
+   ----------------------------------------------------------------
+   Para añadir un concepto: copia un objeto, cambia id/title y escribe
+   el 'body' (o crea un archivo en recursos/ y apunta con 'file'). */
+window.CONCEPTS = [
+
+  {
+    id:       'kerberos',
+    title:    'Kerberos',
+    icon:     '🎫',
+    category: 'Active Directory',
+    summary:  'Protocolo de autenticación de AD basado en tickets: KDC, TGT/TGS y sus abusos más comunes.',
+    tags:     ['AD', 'Autenticación', 'Tickets'],
+    body: `
+      <p><strong>Kerberos</strong> es el protocolo de autenticación por defecto en Active Directory.
+      En lugar de enviar la contraseña por la red, usa <em>tickets</em> cifrados emitidos por una
+      autoridad central, el <strong>KDC</strong> (Key Distribution Center), que en un dominio Windows
+      corre dentro del Controlador de Dominio.</p>
+
+      <h3>Componentes</h3>
+      <ul>
+        <li><strong>KDC</strong> — formado por el <em>Authentication Server (AS)</em> y el
+            <em>Ticket Granting Server (TGS)</em>.</li>
+        <li><strong>TGT</strong> (Ticket Granting Ticket) — ticket "maestro" que prueba que ya te
+            autenticaste. Va cifrado con la clave de la cuenta <code>krbtgt</code>.</li>
+        <li><strong>TGS</strong> (Service Ticket) — ticket para acceder a un servicio concreto. Va
+            cifrado con la clave (hash NT) de la cuenta que ejecuta ese servicio.</li>
+        <li><strong>SPN</strong> (Service Principal Name) — identificador único de un servicio dentro
+            del dominio (ej: <code>MSSQLSvc/db01.corp.local:1433</code>).</li>
+      </ul>
+
+      <h3>Flujo simplificado</h3>
+      <ol>
+        <li><strong>AS-REQ / AS-REP</strong>: el cliente pide un TGT al AS y, si las credenciales son
+            válidas, lo recibe.</li>
+        <li><strong>TGS-REQ / TGS-REP</strong>: el cliente presenta el TGT al TGS y pide un ticket de
+            servicio (TGS) para el SPN deseado.</li>
+        <li><strong>AP-REQ</strong>: el cliente presenta el TGS al servicio, que lo valida y concede
+            acceso.</li>
+      </ol>
+
+      <h3>Abusos ofensivos relacionados</h3>
+      <ul>
+        <li><strong>AS-REP Roasting</strong> — cuentas con "no requerir preautenticación Kerberos"
+            permiten obtener material cifrado con su contraseña sin autenticarse, crackeable offline.</li>
+        <li><strong>Kerberoasting</strong> — cualquier usuario autenticado puede pedir un TGS de una
+            cuenta con SPN; la respuesta va cifrada con el hash de esa cuenta de servicio → crackeo
+            offline de contraseñas débiles.</li>
+        <li><strong>Golden Ticket</strong> — con el hash de <code>krbtgt</code> se puede forjar un TGT
+            arbitrario (persistencia total en el dominio).</li>
+        <li><strong>Silver Ticket</strong> — con el hash de una cuenta de servicio se forja un TGS para
+            ese servicio sin pasar por el KDC.</li>
+      </ul>
+
+      <h3>Defensa (Blue Team)</h3>
+      <p>Contraseñas largas/aleatorias en cuentas de servicio (idealmente gMSA), rotación de
+      <code>krbtgt</code>, monitorización de TGS masivos (evento 4769), y deshabilitar
+      "no preauth" salvo casos justificados.</p>
+    `,
+  },
+
+  {
+    id:       'domain-trusts',
+    title:    'Forest & Domain Trusts',
+    icon:     '🌲',
+    category: 'Active Directory',
+    summary:  'Relaciones de confianza entre dominios y bosques: tipos, transitividad y su abuso.',
+    tags:     ['AD', 'Trusts', 'Forest'],
+    body: `
+      <p>Un <strong>dominio</strong> es una frontera administrativa de AD. Varios dominios que comparten
+      un esquema y un catálogo global forman un <strong>bosque (forest)</strong>, que es la verdadera
+      frontera de seguridad. Las <strong>relaciones de confianza (trusts)</strong> permiten que
+      usuarios de un dominio accedan a recursos de otro.</p>
+
+      <h3>Tipos de trust</h3>
+      <ul>
+        <li><strong>Parent-Child</strong> — se crea automáticamente al añadir un dominio hijo
+            (<code>corp.local</code> ↔ <code>dev.corp.local</code>). Bidireccional y transitiva.</li>
+        <li><strong>Tree-Root</strong> — entre la raíz de dos árboles del mismo bosque. Transitiva.</li>
+        <li><strong>External</strong> — con un dominio de otro bosque. No transitiva.</li>
+        <li><strong>Forest</strong> — entre dos bosques completos. Transitiva dentro de cada bosque.</li>
+        <li><strong>Shortcut</strong> — acorta la ruta de autenticación entre dominios de un bosque grande.</li>
+      </ul>
+
+      <h3>Propiedades clave</h3>
+      <ul>
+        <li><strong>Dirección</strong> — unidireccional o bidireccional (define quién confía en quién).</li>
+        <li><strong>Transitividad</strong> — si A confía en B y B en C, ¿confía A en C? Las trusts
+            internas del bosque suelen ser transitivas; las externas, no.</li>
+      </ul>
+
+      <h3>Abuso ofensivo</h3>
+      <ul>
+        <li><strong>Escalada Child → Parent</strong> — el bosque (no el dominio) es la frontera de
+            seguridad. Comprometer un dominio hijo puede permitir escalar al dominio raíz abusando del
+            historial de SIDs (<em>SID History</em>) y de la confianza intra-bosque.</li>
+        <li><strong>Trust keys</strong> — las trusts tienen claves propias que, si se extraen, permiten
+            forjar tickets inter-dominio.</li>
+        <li><strong>Enumeración</strong> — BloodHound mapea las trusts y las rutas de ataque entre
+            dominios de forma visual.</li>
+      </ul>
+
+      <h3>Defensa (Blue Team)</h3>
+      <p>Aplicar <strong>SID Filtering</strong> en trusts externas, minimizar trusts bidireccionales,
+      tratar cada bosque como una frontera de seguridad real y revisar periódicamente las relaciones
+      con herramientas como BloodHound.</p>
+    `,
+  },
+
+  // ── Plantilla para un nuevo concepto ─────────────────────────
+  // {
+  //   id:       'lfi-rfi',
+  //   title:    'LFI / RFI',
+  //   icon:     '📂',
+  //   category: 'Web',
+  //   summary:  'Inclusión de ficheros local/remota y caminos a RCE.',
+  //   tags:     ['Web', 'OWASP'],
+  //   body:     `<p>Tu explicación en HTML...</p>`,
+  //   // o:  file: 'recursos/lfi-rfi.html',
+  // },
+
+];

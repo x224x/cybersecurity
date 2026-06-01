@@ -8,15 +8,19 @@
   /* ── PALETTE SWITCHER ───────────────────────────────────────── */
   const html = document.documentElement;
 
+  /* Acceso seguro a localStorage (puede fallar en file://, incógnito, etc.) */
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+
   function applyPalette(p) {
     html.setAttribute('data-palette', p);
     document.querySelectorAll('.pal-btn').forEach(b =>
       b.classList.toggle('active', b.dataset.p === p)
     );
-    localStorage.setItem('x224-palette', p);
+    lsSet('x224-palette', p);
   }
 
-  applyPalette(localStorage.getItem('x224-palette') || 'cyber');
+  applyPalette(lsGet('x224-palette') || 'purple');
 
   document.querySelectorAll('.pal-btn').forEach(btn =>
     btn.addEventListener('click', () => applyPalette(btn.dataset.p))

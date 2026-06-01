@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" data-palette="cyber">
+<html lang="es" data-palette="purple">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,11 +33,11 @@
     </ul>
 
     <div class="palette-switcher" title="Cambiar paleta de colores">
-      <button class="pal-btn"        data-p="purple" title="Púrpura Neon"></button>
+      <button class="pal-btn active" data-p="purple" title="Púrpura Neon"></button>
       <button class="pal-btn"        data-p="matrix" title="Verde Matrix"></button>
       <button class="pal-btn"        data-p="red"    title="Rojo Sangre"></button>
       <button class="pal-btn"        data-p="amber"  title="Ámbar Hacker"></button>
-      <button class="pal-btn active" data-p="cyber"  title="Azul Cibernético"></button>
+      <button class="pal-btn"        data-p="cyber"  title="Azul Cibernético"></button>
     </div>
   </nav>
 
@@ -97,18 +97,11 @@
           <p class="nav-card__desc">Credenciales profesionales, formación continua y validación de competencias en diferentes áreas de ciberseguridad.</p>
         </a>
 
-        <a href="tools.html" class="nav-card">
-          <span class="nav-card__badge badge badge-soon">Soon</span>
-          <div class="nav-card__icon">🛠️</div>
-          <h3 class="nav-card__title">Herramientas</h3>
-          <p class="nav-card__desc">Proyectos de hardware y software: USB HID maliciosos, scripts de automatización y herramientas de pentesting propias.</p>
-        </a>
-
         <a href="resources.html" class="nav-card">
-          <span class="nav-card__badge badge badge-soon">Soon</span>
-          <div class="nav-card__icon">📚</div>
-          <h3 class="nav-card__title">Recursos</h3>
-          <p class="nav-card__desc">Guías, tutoriales, configuraciones de entornos de pentesting y notas técnicas sobre metodologías.</p>
+          <span class="nav-card__badge badge badge-active">Active</span>
+          <div class="nav-card__icon">🧠</div>
+          <h3 class="nav-card__title">Conceptos</h3>
+          <p class="nav-card__desc">Base de conocimiento: Active Directory (Kerberos, trusts), explotación web y análisis forense. Apuntes y teoría organizados por temas.</p>
         </a>
 
       </div>
@@ -173,7 +166,7 @@
        SCRIPTS
        Orden importante: data.js primero, luego main.js y terminal.js
        ==================================================== -->
-  <script src="data.js"></script>
+  <script src="data.js?v=2"></script>
   <script src="main.js"></script>
   <script src="terminal.js"></script>
 

@@ -47,9 +47,9 @@
       <h1><span>Certifi</span>caciones</h1>
       <p class="page-header__sub">Credenciales profesionales y validación de competencias en ciberseguridad</p>
       <div class="header-stats">
-        <div class="header-stat"><strong>6</strong>certificaciones</div>
-        <div class="header-stat"><strong>5</strong>emisores distintos</div>
-        <div class="header-stat"><strong>3</strong>áreas cubiertas</div>
+        <div class="header-stat"><strong id="stat-total">0</strong>certificaciones</div>
+        <div class="header-stat"><strong id="stat-issuers">0</strong>emisores distintos</div>
+        <div class="header-stat"><strong id="stat-areas">0</strong>áreas cubiertas</div>
       </div>
     </header>
 
@@ -97,6 +97,10 @@
     <div style="margin-top:0.8rem;">&copy; 2026 x224 · Penetration Testing &amp; Forensics &amp; Cybersecurity</div>
   </footer>
 
+  <!-- PDF.js para renderizar la vista previa de certs en PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <!-- data.js: fuente unica, define window.CERTS -->
+  <script src="data.js?v=2"></script>
   <script>
   /* ============================================================
      CERTIFICADOS — edita este array para añadir / modificar
@@ -111,63 +115,8 @@
        category → "pentest" | "security" | "cloud" | "microsoft"
        verify   → URL verificación o null
      ============================================================ */
-  const CERTS = [
-    {
-      name:     'eCPPT v3 — Certified Professional Penetration Tester',
-      short:    'eCPPTv3',
-      issuer:   'eLearnSecurity · INE',
-      img:      'certs/eCPPTv3.png',
-      date:     '26 feb 2026',
-      category: 'pentest',
-      verify:   null,
-    },
-    {
-      name:     'eJPT v2 — eLearnSecurity Junior Penetration Tester',
-      short:    'eJPTv2',
-      issuer:   'eLearnSecurity · INE',
-      img:      'certs/eJPTv2.png',
-      date:     '25 dic 2025',
-      category: 'pentest',
-      verify:   null,
-    },
-    {
-      name:     'CEH v13 — Certified Ethical Hacker',
-      short:    'CEHv13',
-      issuer:   'EC-Council',
-      img:      'certs/CEHv13.png',
-      date:     '18 nov 2025',
-      category: 'security',
-      verify:   null,
-    },
-    {
-      name:     'AWS Certified Cloud Practitioner',
-      short:    'AWS CCP',
-      issuer:   'Amazon Web Services',
-      img:      'certs/AWSCloudPractitioner.png',
-      date:     '30 jun 2025',
-      category: 'cloud',
-      verify:   null,
-    },
-    {
-      name:     'SC-900 — Microsoft Security Fundamentals',
-      short:    'SC-900',
-      issuer:   'Microsoft',
-      img:      'certs/SC-900.png',
-      date:     '6 mar 2025',
-      category: 'cloud',
-      verify:   null,
-    },
-    {
-      name:     'CCST Cybersecurity',
-      short:    'CCST',
-      issuer:   'Cisco',
-      img:      'certs/CCST.png',
-      date:     '14 ene 2025',
-      category: 'security',
-      verify:   null,
-    },
-  ];
-  /* ============================================================ */
+  const CERTS = window.CERTS || [];
+  /* (los certificados se editan en data.js) */
 
   const CAT_LABEL = {
     pentest:   { label: 'Pentesting', cls: 'cat-pentest'   },
@@ -178,18 +127,20 @@
 
   /* ── PALETTE ── */
   const html = document.documentElement;
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   function applyPalette(p) {
     html.setAttribute('data-palette', p);
     document.querySelectorAll('.pal-btn').forEach(b => b.classList.toggle('active', b.dataset.p === p));
-    localStorage.setItem('x224-palette', p);
+    lsSet('x224-palette', p);
   }
   // Restaurar paleta guardada, o usar púrpura por defecto en esta página
-  const saved = localStorage.getItem('x224-palette');
+  const saved = lsGet('x224-palette');
   applyPalette(saved || 'purple');
   document.querySelectorAll('.pal-btn').forEach(b => b.addEventListener('click', () => applyPalette(b.dataset.p)));
 
   /* ── MATRIX RAIN ── */
-  (function(){
+  (function(){ try {
     const canvas = document.getElementById('matrix-canvas');
     const ctx    = canvas.getContext('2d');
     function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
@@ -215,34 +166,89 @@
         drops[i]++;
       }
     }, 45);
-  })();
+  } catch (e) { /* matrix no critico */ } })();
 
-  /* ── RENDER CARDS ── */
+  /* PDF.js: render de la 1a pagina como vista previa */
+  if (window.pdfjsLib) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+  }
+  async function renderPdfThumb(url, targetW) {
+    const pdf  = await pdfjsLib.getDocument(url).promise;
+    const page = await pdf.getPage(1);
+    const base = page.getViewport({ scale: 1 });
+    const vp   = page.getViewport({ scale: (targetW || 900) / base.width });
+    const cv   = document.createElement('canvas');
+    cv.width = vp.width; cv.height = vp.height;
+    await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+    return cv.toDataURL('image/png');
+  }
+
+  /* RENDER CARDS */
+  function isPdf(path) { return /\.pdf$/i.test(path || ''); }
+
   function renderCards() {
     const grid = document.getElementById('certs-grid');
     CERTS.forEach((c, i) => {
       const cat  = CAT_LABEL[c.category] || { label: c.category, cls: 'cat-security' };
+      const pdf  = isPdf(c.img);
       const card = document.createElement('div');
       card.className = 'cert-card';
+
+      const preview = pdf
+        ? `<img class="cert-card__img" alt="${c.name}" style="opacity:0;transition:opacity .4s">
+           <div class="cert-card__pdf" data-loading>
+             <div class="cert-card__pdf-icon">\u23f3</div>
+             <div class="cert-card__pdf-label">Cargando vista previa\u2026</div>
+           </div>`
+        : `<img class="cert-card__img" src="${c.img}" alt="${c.name}"
+                onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+           <div class="cert-card__img-placeholder" style="display:none;align-items:center;justify-content:center;width:100%;height:100%">\ud83c\udf93</div>`;
+
       card.innerHTML = `
-        <div class="cert-card__img-wrap">
-          <img class="cert-card__img" src="${c.img}" alt="${c.name}"
-               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="cert-card__img-placeholder" style="display:none;align-items:center;justify-content:center;width:100%;height:100%">🎓</div>
-        </div>
+        <div class="cert-card__img-wrap">${preview}</div>
         <div class="cert-card__body">
           <div class="cert-card__vendor"><span class="vendor-dot"></span>${c.issuer}</div>
           <div class="cert-card__name">${c.name}</div>
           <div class="cert-card__meta">
             <span class="cat-tag ${cat.cls}">${cat.label}</span>
-            <span class="cat-tag" style="border-color:var(--border);color:var(--text-muted)">📅 ${c.date}</span>
+            <span class="cat-tag" style="border-color:var(--border);color:var(--text-muted)">\ud83d\udcc5 ${c.date}</span>
           </div>
-          ${c.verify ? `<a class="cert-card__link" href="${c.verify}" target="_blank">🔗 Verificar</a>` : ''}
+          ${c.verify ? `<a class="cert-card__link" href="${c.verify}" target="_blank">\ud83d\udd17 Verificar</a>` : ''}
+          ${pdf ? `<a class="cert-card__link" href="${c.img}" target="_blank">\u2197 Abrir PDF</a>` : ''}
         </div>
         <div class="cert-card__num">0${i + 1}</div>`;
 
-      card.querySelector('.cert-card__img-wrap')
-          .addEventListener('click', () => openModal(c.img, c.name));
+      const wrap = card.querySelector('.cert-card__img-wrap');
+
+      if (pdf) {
+        const img  = wrap.querySelector('.cert-card__img');
+        const load = wrap.querySelector('[data-loading]');
+        const showPlaceholder = () => {
+          if (load) {
+            load.querySelector('.cert-card__pdf-icon').textContent = '\ud83d\udcc4';
+            load.querySelector('.cert-card__pdf-label').textContent = 'PDF \u00b7 clic para abrir';
+          }
+        };
+        if (window.pdfjsLib) {
+          renderPdfThumb(c.img).then(url => {
+            c.__thumb = url;
+            img.src = url;
+            img.style.opacity = 1;
+            if (load) load.remove();
+          }).catch(showPlaceholder);
+        } else {
+          // PDF.js no disponible (file://, CDN bloqueado…): no dejar "Cargando" colgado
+          showPlaceholder();
+        }
+      }
+
+      wrap.addEventListener('click', () => {
+        if (!pdf)      { openModal(c.img, c.name); return; }
+        if (c.__thumb) { openModal(c.__thumb, c.name); return; }
+        window.open(c.img, '_blank');
+      });
+
       grid.appendChild(card);
     });
   }
@@ -278,8 +284,30 @@
   }
   function onEsc(e) { if (e.key === 'Escape') closeModal(); }
 
-  renderCards();
-  renderTimeline();
+  /* ── STATS DINÁMICAS ── */
+  function renderStats() {
+    const issuers = new Set(CERTS.map(c => c.issuer.split('·')[0].trim()));
+    const areas   = new Set(CERTS.map(c => (CAT_LABEL[c.category] || {}).label || c.category));
+    document.getElementById('stat-total').textContent   = CERTS.length;
+    document.getElementById('stat-issuers').textContent = issuers.size;
+    document.getElementById('stat-areas').textContent   = areas.size;
+  }
+
+  /* ── Aviso si data.js está desactualizado ── */
+  if (!window.CERTS || !Array.isArray(window.CERTS) || window.CERTS.length === 0) {
+    const grid = document.getElementById('certs-grid');
+    if (grid) grid.innerHTML =
+      '<div style="grid-column:1/-1;padding:2rem;border:1px solid var(--red);' +
+      'border-radius:12px;background:rgba(248,113,113,0.08);color:var(--text-2);' +
+      'font-size:0.9rem;line-height:1.7">' +
+      '<strong style="color:var(--red);font-family:Orbitron,sans-serif">⚠ data.js desactualizado</strong><br>' +
+      'No se encontró <code>window.CERTS</code>. Reemplaza <code>data.js</code> por la versión nueva ' +
+      '(es la que contiene TODOS los certificados, writeups, forense y conceptos) y recarga con Ctrl+Shift+R.</div>';
+  } else {
+    renderStats();
+    renderCards();
+    renderTimeline();
+  }
   </script>
 
 </body>

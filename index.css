@@ -320,6 +320,8 @@
 .t-dir    { color: var(--accent); font-weight: 700; }
 .t-file   { color: var(--text-2); }
 .t-link   { color: var(--green); text-decoration: underline; cursor: pointer; }
+.t-muted  { color: var(--text-muted); }
+.t-link:hover { color: var(--accent); }
 
 .terminal-input-row {
   display: flex;

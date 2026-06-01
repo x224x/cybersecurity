@@ -28,7 +28,29 @@
       forensicChildren[f.filename] = {
         type:    'file',
         openUrl: f.pdf,
-        desc:    f.label
+        desc:    f.title
+      };
+    });
+
+    /* Certificaciones — generadas desde window.CERTS */
+    const certChildren = {};
+    (window.CERTS || []).forEach(c => {
+      const ext   = (c.img && c.img.split('.').pop()) || 'png';
+      const fname = c.short.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') + '.' + ext;
+      certChildren[fname] = {
+        type:    'file',
+        openUrl: c.verify || c.img || null,
+        desc:    `${c.name} — ${c.date}`
+      };
+    });
+
+    /* Conceptos — generados desde window.CONCEPTS */
+    const conceptChildren = {};
+    (window.CONCEPTS || []).forEach(k => {
+      conceptChildren[k.id + '.md'] = {
+        type:    'file',
+        openUrl: k.file || ('resources.html#' + k.id),
+        desc:    `${k.title} (${k.category})`
       };
     });
 
@@ -52,9 +74,8 @@
             x224: { type: 'dir', children: {
               writeups:  { type: 'dir', link: 'writeups.html',       children: writeupChildren },
               forensics: { type: 'dir', link: 'forensics.html',      children: forensicChildren },
-              certs:     { type: 'dir', link: 'certifications.html', children: {} },
-              tools:     { type: 'dir', link: 'tools.html',          children: {} },
-              resources: { type: 'dir', link: 'resources.html',      children: {} },
+              certs:     { type: 'dir', link: 'certifications.html', children: certChildren },
+              resources: { type: 'dir', link: 'resources.html',      children: conceptChildren },
               'README.md': { type: 'file', content:
                 '# x224 — CyberSec Portfolio\n' +
                 '=====================================\n' +
@@ -63,8 +84,8 @@
                 '  writeups/   → CTF writeups (HTB, THM)\n' +
                 '  forensics/  → Análisis forenses digitales\n' +
                 '  certs/      → Certificaciones\n' +
-                '  tools/      → Herramientas propias\n' +
-                '  resources/  → Recursos y guías\n\n' +
+                '  resources/  → Conceptos y apuntes técnicos\n\n' +
+                'Tip: cd resources && ls   ·   open kerberos.md\n' +
                 'Contacto: linkedin.com/in/x224'
               },
               '.bash_history': { type: 'file', content:
@@ -213,8 +234,10 @@
       print(`<span class="t-info">╚══════════════════════════════════════════════════════╝</span>`);
       br();
       print(`  <span class="t-info">ls [ruta]</span>        listar directorio`);
-      print(`  <span class="t-info">cd &lt;ruta&gt;</span>       cambiar dir · <span class="t-success">cd writeups</span> navega a la sección`);
+      print(`  <span class="t-info">cd &lt;ruta&gt;</span>       cambiar de directorio (explora ~/writeups, ~/forensics...)`);
+      print(`  <span class="t-info">open [ruta]</span>     abrir la página web de la sección · o un PDF en pestaña nueva`);
       print(`  <span class="t-info">cat &lt;archivo&gt;</span>   mostrar fichero · abre PDFs en nueva pestaña`);
+      print(`  <span class="t-info">tree [ruta]</span>     árbol de directorios`);
       print(`  <span class="t-info">pwd</span>             ruta actual`);
       print(`  <span class="t-info">whoami</span>          info de usuario`);
       print(`  <span class="t-info">uname [-a]</span>      info del sistema`);
@@ -226,8 +249,8 @@
       br();
       print(`<span class="t-success">Ejemplos:</span>`);
       print(`  <span class="t-muted">$</span> ls /                       <span class="t-muted"># directorios raíz</span>`);
-      print(`  <span class="t-muted">$</span> ls ~/writeups               <span class="t-muted"># tus writeups</span>`);
-      print(`  <span class="t-muted">$</span> cd forensics               <span class="t-muted"># ir a la página de forense</span>`);
+      print(`  <span class="t-muted">$</span> cd ~/writeups && ls         <span class="t-muted"># explora tus writeups</span>`);
+      print(`  <span class="t-muted">$</span> open forensics             <span class="t-muted"># abre la página de forense</span>`);
       print(`  <span class="t-muted">$</span> cat ~/forensics/Volcado_Memoria_Windows.pdf`);
       br();
     },
@@ -270,7 +293,7 @@
 
       dirs.forEach(([name, v]) => {
         const hint = v.link
-          ? `  <span class="t-success" style="font-size:0.76rem">→ ${esc(v.link)}</span>`
+          ? `  <span class="t-link" data-go="${esc(v.link)}" style="font-size:0.76rem;cursor:pointer">→ ${esc(v.link)}</span>`
           : '';
         print(`  <span class="t-dir">${esc(name)}/</span>${hint}`);
       });
@@ -278,8 +301,12 @@
         const hint = v.desc
           ? `  <span class="t-muted" style="font-size:0.76rem"># ${esc(v.desc)}</span>`
           : '';
-        const cls  = name.startsWith('.') ? 'style="opacity:0.55"' : '';
-        print(`  <span class="t-file" ${cls}>${esc(name)}</span>${hint}`);
+        const dim = name.startsWith('.') ? 'opacity:0.55;' : '';
+        if (v.openUrl) {
+          print(`  <span class="t-link" data-open="${esc(v.openUrl)}" style="cursor:pointer;${dim}">${esc(name)}</span>${hint}`);
+        } else {
+          print(`  <span class="t-file" style="${dim}">${esc(name)}</span>${hint}`);
+        }
       });
       br();
     },
@@ -311,16 +338,12 @@
         return;
       }
 
-      // Tiene enlace a página → navegar
-      if (node.link) {
-        print(`<span class="t-success">↗ Navegando a ${esc(node.link)}...</span>`);
-        br();
-        setTimeout(() => { window.location.href = node.link; }, 700);
-        return;
-      }
-
+      // Tiene enlace a página → entra localmente y sugiere abrirla
       cwd = resolved;
       updatePromptLabel();
+      if (node.link) {
+        print(`<span class="t-muted">💡 Sección con página web. Escribe <span class="t-info">open</span> para abrirla en el navegador, o <span class="t-info">ls</span> para ver su contenido.</span>`);
+      }
       br();
     },
 
@@ -424,14 +447,64 @@
 
     /* ── open ─────────────────────────────────────────────────── */
     open(args) {
-      // Alias de cat para abrir ficheros/páginas
+      const target = args[0];
+      const node   = target ? getNode(resolvePath(target)) : getNode(cwd);
+
+      // Directorio con página web asociada → navegar
+      if (node && node.type === 'dir' && node.link) {
+        print(`<span class="t-success">↗ Navegando a ${esc(node.link)}...</span>`);
+        br();
+        setTimeout(() => { window.location.href = node.link; }, 700);
+        return;
+      }
+      if (!target) {
+        print(`<span class="t-error">open: este directorio no tiene página asociada</span>`);
+        print(`<span class="t-muted">Prueba <span class="t-info">open writeups</span>, <span class="t-info">open forensics</span> o <span class="t-info">open certs</span>.</span>`);
+        br();
+        return;
+      }
+      // Fichero (PDF, etc.) → delega en cat, que abre openUrl en pestaña nueva
       COMMANDS.cat(args);
+    },
+
+    /* ── tree ─────────────────────────────────────────────────── */
+    tree(args) {
+      const start = args[0] ? resolvePath(args[0]) : [...cwd];
+      const root  = getNode(start);
+      if (!root) {
+        print(`<span class="t-error">tree: ${esc(args[0] || '.')}: No existe el fichero o directorio</span>`);
+        br(); return;
+      }
+      print(`<span class="t-dir">${esc(pathToDisplay(start))}</span>`);
+      let nDirs = 0, nFiles = 0;
+      (function walk(node, prefix, depth) {
+        if (!node.children || node.restricted || depth > 3) return;
+        const entries = Object.entries(node.children)
+          .filter(([k]) => !k.startsWith('.'))
+          .sort(([a, va], [b, vb]) =>
+            (va.type === 'dir' ? -1 : 1) - (vb.type === 'dir' ? -1 : 1) || a.localeCompare(b));
+        entries.forEach(([name, v], i) => {
+          const last = i === entries.length - 1;
+          const branch = last ? '└── ' : '├── ';
+          if (v.type === 'dir') {
+            nDirs++;
+            print(`<span class="t-muted">${esc(prefix + branch)}</span><span class="t-dir">${esc(name)}/</span>`);
+            walk(v, prefix + (last ? '    ' : '│   '), depth + 1);
+          } else {
+            nFiles++;
+            print(`<span class="t-muted">${esc(prefix + branch)}</span><span class="t-file">${esc(name)}</span>`);
+          }
+        });
+      })(root, '', 0);
+      br();
+      print(`<span class="t-muted">${nDirs} directorios, ${nFiles} ficheros</span>`);
+      br();
     },
 
     /* ── man ──────────────────────────────────────────────────── */
     man(args) {
       if (!args[0]) { print(`<span class="t-error">¿De qué quieres el manual?</span>`); return; }
-      const known = ['ls','cd','cat','pwd','whoami','echo','uname','clear','history'];
+      const known = ['ls','cd','cat','pwd','whoami','echo','uname','clear','history','open','tree'];
       if (known.includes(args[0])) {
         print(`<span class="t-info">man: ${esc(args[0])}</span> — escribe <span class="t-info">help</span> para ver todos los comandos.`);
       } else {
@@ -612,7 +685,13 @@
     }
   });
 
-  output.addEventListener('click', () => input.focus());
+  output.addEventListener('click', (e) => {
+    const go = e.target.closest('[data-go]');
+    if (go) { e.stopPropagation(); window.location.href = go.dataset.go; return; }
+    const op = e.target.closest('[data-open]');
+    if (op) { e.stopPropagation(); window.open(op.dataset.open, '_blank'); return; }
+    input.focus();
+  });
   document.querySelector('.terminal-input-row')?.addEventListener('click', () => input.focus());
 
   /* Auto-focus al hacer scroll hasta la sección */

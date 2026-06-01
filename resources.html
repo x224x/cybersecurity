@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es" data-palette="purple">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conceptos | x224 CyberSec</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="resources.css">
+</head>
+<body>
+
+  <canvas id="matrix-canvas"></canvas>
+  <div class="scanline"></div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a class="navbar__logo" href="index.html">x<em>224</em></a>
+    <ul class="navbar__nav">
+      <li><a href="index.html#about">whoami</a></li>
+      <li><a href="index.html#sections">secciones</a></li>
+      <li><a href="index.html#terminal">terminal</a></li>
+      <li><a href="writeups.html">writeups</a></li>
+      <li><a href="forensics.html">forense</a></li>
+      <li><a href="certifications.html">certificaciones</a></li>
+      <li><a href="resources.html" class="active">conceptos</a></li>
+    </ul>
+    <div class="palette-switcher" title="Cambiar paleta de colores">
+      <button class="pal-btn active" data-p="purple" title="Púrpura Neon"></button>
+      <button class="pal-btn"       data-p="matrix" title="Verde Matrix"></button>
+      <button class="pal-btn"       data-p="red"    title="Rojo Sangre"></button>
+      <button class="pal-btn"       data-p="amber"  title="Ámbar Hacker"></button>
+      <button class="pal-btn"       data-p="cyber"  title="Azul Cibernético"></button>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <!-- HEADER -->
+    <header class="page-header">
+      <a href="index.html" class="back-link">← Volver al Portfolio</a>
+      <h1><span>Con</span>ceptos</h1>
+      <p class="page-header__sub">Base de conocimiento: teoría, apuntes técnicos y fundamentos organizados por temas</p>
+      <div class="header-stats">
+        <div class="header-stat"><strong id="stat-total">0</strong>conceptos</div>
+        <div class="header-stat"><strong id="stat-cats">0</strong>categorías</div>
+      </div>
+    </header>
+
+    <!-- BÚSQUEDA -->
+    <div class="search-bar">
+      <span class="search-bar__icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="$ buscar concepto por título, categoría o etiqueta...">
+    </div>
+
+    <!-- FILTROS (categorías, se generan solas) -->
+    <div class="filters" id="filterBtns"></div>
+
+    <!-- GRID -->
+    <div id="concepts-root"></div>
+    <p class="no-results" id="noResults">
+      No se encontraron conceptos para <span id="noResultsQuery"></span>
+    </p>
+
+  </div>
+
+  <!-- MODAL DE ARTÍCULO -->
+  <div id="concept-modal" class="concept-modal" onclick="closeConcept()">
+    <div class="concept-modal__panel" onclick="event.stopPropagation()">
+      <button class="concept-modal__close" onclick="closeConcept()">[ ESC ] cerrar ✕</button>
+      <div class="concept-modal__cat" id="modal-cat"></div>
+      <h2 class="concept-modal__title" id="modal-title"></h2>
+      <div class="concept-article" id="modal-body"></div>
+    </div>
+  </div>
+
+  <footer>
+    <div>
+      <a href="https://linkedin.com/in/x224" target="_blank">LinkedIn</a>
+      <a href="mailto:xw.xinweiwu@gmail.com">Contact</a>
+    </div>
+    <div style="margin-top:0.8rem;">&copy; 2026 x224 · Penetration Testing &amp; Forensics &amp; Cybersecurity</div>
+  </footer>
+
+  <!-- data.js PRIMERO — define window.CONCEPTS · luego main.js (paleta + matrix) -->
+  <script src="data.js?v=2"></script>
+  <script src="main.js"></script>
+  <script>
+  /* ============================================================
+     CONCEPTOS — usa window.CONCEPTS de data.js
+     Para añadir conceptos: edita data.js
+     ============================================================ */
+  const CONCEPTS = window.CONCEPTS || [];
+
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  /* ── ESTADO búsqueda / filtro ── */
+  let activeCat  = 'all';
+  let searchTerm = '';
+
+  /* ── Categorías únicas (para los filtros) ── */
+  const CATS = [...new Set(CONCEPTS.map(c => c.category))];
+
+  function renderFilters() {
+    const wrap = document.getElementById('filterBtns');
+    const mk = (val, label, active) =>
+      `<button class="filter-btn ${active ? 'active' : ''}" data-cat="${esc(val)}">${esc(label)}</button>`;
+    wrap.innerHTML = mk('all', 'Todos', true) + CATS.map(c => mk(c, c, false)).join('');
+    wrap.addEventListener('click', e => {
+      const btn = e.target.closest('.filter-btn');
+      if (!btn) return;
+      activeCat = btn.dataset.cat;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b === btn));
+      render();
+    });
+  }
+
+  /* ── Tarjeta de concepto ── */
+  function card(c) {
+    const tags = (c.tags || []).map(t => `<span class="concept-card__tag">${esc(t)}</span>`).join('');
+    const el = document.createElement('article');
+    el.className = 'concept-card';
+    el.dataset.id = c.id;
+    el.innerHTML = `
+      <div class="concept-card__top">
+        <div class="concept-card__icon">${c.icon || '📄'}</div>
+        <span class="concept-card__cat">${esc(c.category)}</span>
+      </div>
+      <h3 class="concept-card__title">${esc(c.title)}</h3>
+      <p class="concept-card__summary">${esc(c.summary || '')}</p>
+      <div class="concept-card__tags">${tags}</div>
+      <span class="concept-card__cta">${c.file ? '↗ Abrir archivo' : (c.sections ? 'Ver apartados →' : 'Leer concepto →')}</span>`;
+    el.addEventListener('click', () => openConcept(c.id));
+    return el;
+  }
+
+  /* ── Filtrado ── */
+  function getFiltered() {
+    return CONCEPTS.filter(c => {
+      const okCat = activeCat === 'all' || c.category === activeCat;
+      const hay = [c.title, c.category, c.summary, ...(c.tags || [])].join(' ').toLowerCase();
+      return okCat && (!searchTerm || hay.includes(searchTerm.toLowerCase()));
+    });
+  }
+
+  /* ── Render agrupado por categoría ── */
+  function render() {
+    const root = document.getElementById('concepts-root');
+    root.innerHTML = '';
+    const list = getFiltered();
+
+    document.getElementById('noResults').style.display = list.length ? 'none' : 'block';
+    document.getElementById('noResultsQuery').textContent = `"${searchTerm || activeCat}"`;
+
+    // Mantener el orden de CATS, mostrando solo las que tengan resultados
+    CATS.forEach(cat => {
+      const items = list.filter(c => c.category === cat);
+      if (!items.length) return;
+      const title = document.createElement('div');
+      title.className = 'section-title';
+      title.textContent = '// ' + cat;
+      root.appendChild(title);
+
+      const grid = document.createElement('div');
+      grid.className = 'concepts-grid';
+      items.forEach(c => grid.appendChild(card(c)));
+      root.appendChild(grid);
+    });
+  }
+
+  /* ── Mini-renderizador Markdown (suficiente para estos apuntes) ──
+     Soporta: #### → h3, **negrita**, `código inline`, bloques ```código```
+     (en <pre> monoespaciado con scroll), listas - / *, --- separador,
+     y párrafos. Escapa HTML para que el ASCII art no rompa el layout. */
+  function mdToHtml(md) {
+    md = md.replace(/\r\n/g, '\n').replace(/\u200b/g, '');  // quita zero-width space (los .md lo traen)
+    const escc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const inline = s => {
+      // primero escapamos, luego aplicamos formato sobre el texto escapado
+      let t = escc(s);
+      // imágenes estilo Obsidian ![[archivo.png]] → aviso (no tenemos el archivo)
+      t = t.replace(/!\[\[([^\]]+)\]\]/g,
+        (m, name) => `<span class="md-img md-img--missing">🖼️ imagen: ${name}</span>`);
+      // imágenes ![alt](url) → enlace discreto (las imágenes son externas)
+      t = t.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,
+        (m, alt, url) => `<a href="${url}" target="_blank" rel="noopener" class="md-img">🖼️ ${alt || 'ver imagen'} ↗</a>`);
+      // enlaces [texto](url)
+      t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g,
+        (m, txt, url) => `<a href="${url}" target="_blank" rel="noopener">${txt}</a>`);
+      t = t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      t = t.replace(/`([^`]+?)`/g, '<code>$1</code>');
+      return t;
+    };
+
+    const rawLines = md.split('\n');
+    let html = '', heads = [], n = 0;
+    let inList = false, listIndent = 0;
+    const closeList = () => { if (inList) { html += '</ul>'; inList = false; } };
+
+    let i = 0;
+    while (i < rawLines.length) {
+      const line = rawLines[i];
+      // ── Fence de código: 3 o más backticks (captura el cierre de igual longitud) ──
+      const fence = line.match(/^(\s*)(`{3,})(.*)$/);
+      if (fence) {
+        const ticks = fence[2];
+        const buf = [];
+        i++;
+        while (i < rawLines.length && !new RegExp('^\\s*' + ticks + '\\s*$').test(rawLines[i])) {
+          buf.push(rawLines[i]); i++;
+        }
+        i++; // saltar la línea de cierre
+        closeList();
+        // recorta líneas en blanco al principio/fin del bloque
+        while (buf.length && buf[0].trim() === '') buf.shift();
+        while (buf.length && buf[buf.length-1].trim() === '') buf.pop();
+        html += '<pre><code>' + escc(buf.join('\n')) + '</code></pre>';
+        continue;
+      }
+      const t = line.trimEnd();
+      if (/^#{1,6}\s/.test(t)) {
+        closeList();
+        const txt = t.replace(/^#+\s/, '');
+        const id  = 'sec-' + (n++);
+        heads.push({ id, txt });
+        html += `<h3 id="${id}">${inline(txt)}</h3>`;
+      } else if (/^\s*---+\s*$/.test(t) || /^\s*___+\s*$/.test(t) || /^\s*\*\*\*+\s*$/.test(t)) {
+        closeList(); html += '<hr>';
+      } else if (/^\s*>\s?/.test(t)) {
+        closeList();
+        html += '<blockquote>' + inline(t.replace(/^\s*>\s?/, '')) + '</blockquote>';
+      } else if (/^\s*[-*+]\s+/.test(t)) {
+        if (!inList) { html += '<ul>'; inList = true; }
+        html += '<li>' + inline(t.replace(/^\s*[-*+]\s+/, '')) + '</li>';
+      } else if (/^\s*\d+\.\s+/.test(t)) {
+        if (!inList) { html += '<ul>'; inList = true; }
+        html += '<li>' + inline(t.replace(/^\s*\d+\.\s+/, '')) + '</li>';
+      } else if (t.trim() === '') {
+        closeList();
+      } else {
+        closeList(); html += '<p>' + inline(t) + '</p>';
+      }
+      i++;
+    }
+    closeList();
+
+    let toc = '';
+    if (heads.length >= 3) {
+      toc = '<nav class="concept-toc"><div class="concept-toc__title">Índice</div><ul>' +
+            heads.map(h => `<li><a href="#${h.id}" data-toc>${inline(h.txt)}</a></li>`).join('') +
+            '</ul></nav>';
+    }
+    return toc + '<div class="concept-md">' + html + '</div>';
+  }
+
+  /* ── Pinta el modal con cabecera + html dado ── */
+  function fillModal(cat, title, html) {
+    document.getElementById('modal-cat').textContent   = cat;
+    document.getElementById('modal-title').textContent = title;
+    const body = document.getElementById('modal-body');
+    body.innerHTML = html;
+    body.querySelectorAll('a[data-toc]').forEach(a => {
+      a.addEventListener('click', ev => {
+        ev.preventDefault();
+        const t = body.querySelector(a.getAttribute('href'));
+        if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+    document.getElementById('concept-modal').scrollTop = 0;
+  }
+
+  /* ── Vista del contenedor: muestra sub-tarjetas de apartados ── */
+  function showSections(c) {
+    const cards = c.sections.map(s => `
+      <article class="subcard" data-sec="${esc(s.id)}">
+        <div class="subcard__icon">${s.icon || '📄'}</div>
+        <div class="subcard__body">
+          <h4 class="subcard__title">${esc(s.title)}</h4>
+          <p class="subcard__summary">${esc(s.summary || '')}</p>
+        </div>
+        <span class="subcard__arrow">→</span>
+      </article>`).join('');
+    const intro = c.intro ? `<p class="concept-intro">${esc(c.intro)}</p>` : '';
+    fillModal(c.category, c.title, intro + '<div class="subcards">' + cards + '</div>');
+    document.querySelectorAll('#modal-body .subcard').forEach(el => {
+      el.addEventListener('click', () => openSection(c, el.dataset.sec));
+    });
+  }
+
+  /* ── Abre un apartado concreto (carga su .md) ── */
+  function openSection(c, secId) {
+    const s = c.sections.find(x => x.id === secId);
+    if (!s) return;
+    const path = 'recursos/' + c.id + '/' + s.id + '.md';
+    const back = '<button class="concept-back" id="concept-back">← Volver a ' + esc(c.title) + '</button>';
+    fillModal(c.category + ' · ' + c.title, s.title, back + '<p style="color:var(--text-muted)">Cargando…</p>');
+    document.getElementById('concept-back').addEventListener('click', () => showSections(c));
+    if (history.replaceState) history.replaceState(null, '', '#' + c.id + '/' + s.id);
+
+    fetch(path)
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .then(md => {
+        fillModal(c.category + ' · ' + c.title, s.title, back + mdToHtml(md));
+        document.getElementById('concept-back').addEventListener('click', () => showSections(c));
+      })
+      .catch(() => {
+        fillModal(c.category + ' · ' + c.title, s.title, back +
+          '<p style="color:var(--red)">No se pudo cargar <code>' + path + '</code>.</p>' +
+          '<p style="color:var(--text-muted);font-size:.85rem">Si abres el sitio como archivo local (file://), ' +
+          'el navegador bloquea la carga. Usa un servidor: <code>python3 -m http.server</code> y entra en ' +
+          '<code>http://localhost:8000</code>. En tu web publicada funciona con normalidad.</p>');
+        document.getElementById('concept-back').addEventListener('click', () => showSections(c));
+      });
+  }
+
+  /* ── MODAL ── */
+  function openConcept(id) {
+    // soporta hash tipo "domain-trusts/fundamentos"
+    let secId = null;
+    if (id && id.indexOf('/') !== -1) { const p = id.split('/'); id = p[0]; secId = p[1]; }
+    const c = CONCEPTS.find(x => x.id === id);
+    if (!c) return;
+    if (c.file) { window.open(c.file, '_blank'); return; }
+
+    document.getElementById('concept-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', onEsc);
+
+    if (c.sections) {
+      if (secId) { openSection(c, secId); }
+      else { showSections(c); if (history.replaceState) history.replaceState(null, '', '#' + id); }
+      return;
+    }
+    // concepto normal (body HTML)
+    fillModal(c.category, c.title, c.body || '<p>Contenido pendiente.</p>');
+    if (history.replaceState) history.replaceState(null, '', '#' + id);
+  }
+  function closeConcept() {
+    document.getElementById('concept-modal').classList.remove('open');
+    document.body.style.overflow = '';
+    if (history.replaceState) history.replaceState(null, '', location.pathname);
+    document.removeEventListener('keydown', onEsc);
+  }
+  function onEsc(e) { if (e.key === 'Escape') closeConcept(); }
+
+  /* ── INIT ── */
+  document.getElementById('stat-total').textContent = CONCEPTS.length;
+  document.getElementById('stat-cats').textContent  = CATS.length;
+  renderFilters();
+  render();
+
+  document.getElementById('searchInput').addEventListener('input', e => {
+    searchTerm = e.target.value;
+    render();
+  });
+
+  // Abrir concepto si la URL trae #id (ej: desde la terminal: open domain-trusts.md)
+  if (location.hash) openConcept(location.hash.slice(1));
+  window.addEventListener('hashchange', () => {
+    // Solo reaccionar a cambios de hash externos (modal cerrado); los internos
+    // (volver, abrir apartado) se gestionan con replaceState y no deben reabrir.
+    const open = document.getElementById('concept-modal').classList.contains('open');
+    if (!open && location.hash) openConcept(location.hash.slice(1));
+  });
+  </script>
+
+</body>
+</html>
